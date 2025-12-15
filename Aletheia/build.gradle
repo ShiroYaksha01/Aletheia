@@ -10,7 +10,7 @@ description = 'Research Paper Submission and Review System'
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
+		languageVersion = JavaLanguageVersion.of(25)
 	}
 }
 
