@@ -1,4 +1,4 @@
-package aletheia.project.Aletheia.security;
+package aletheia.project.Aletheia.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
