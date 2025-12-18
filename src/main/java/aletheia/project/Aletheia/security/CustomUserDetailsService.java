@@ -6,6 +6,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import aletheia.project.Aletheia.entity.UserEntity;
+import aletheia.project.Aletheia.repository.UserRepository;
+
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 

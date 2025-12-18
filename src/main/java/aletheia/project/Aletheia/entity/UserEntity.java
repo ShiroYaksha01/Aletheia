@@ -1,4 +1,4 @@
-package aletheia.project.Aletheia.security;
+package aletheia.project.Aletheia.entity;
 
 import jakarta.persistence.*;
 

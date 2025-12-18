@@ -1,4 +1,4 @@
-package aletheia.project.Aletheia.security;
+package aletheia.project.Aletheia.config;
 
 import java.security.SecureRandom;
 
@@ -14,6 +14,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import aletheia.project.Aletheia.security.CustomUserDetailsService;
+import aletheia.project.Aletheia.security.JwtFilter;
 
 @Configuration
 @EnableMethodSecurity
@@ -44,19 +47,28 @@ public class SecurityConfig {
         return authenticationProvider;
     }
 
+    // In SecurityConfig.java
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        //just filter out for testing /api
-        httpSecurity.csrf(crsf -> crsf.disable()).cors(Customizer.withDefaults())
-                .authenticationProvider(authProvider())
-                .authorizeHttpRequests(
-                    auth -> auth.requestMatchers("/api/login",
-                            "/login","/register","/api/register")
-                            .permitAll()
-                            .requestMatchers("/products").authenticated()
-                            .anyRequest()
-                            .authenticated())
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+        httpSecurity
+            .csrf(csrf -> csrf.disable()) // Enable this later for production security
+            .cors(Customizer.withDefaults())
+            .authenticationProvider(authProvider())
+            .authorizeHttpRequests(auth -> auth
+                // 1. Only allow these without login
+                .requestMatchers("/login", "/register").permitAll()
+                .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+                // 2. Everything else requires authentication
+                .anyRequest().authenticated()
+            )
+            // 3. Redirect to /login if the user is not authenticated
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.sendRedirect("/login");
+                })
+            )
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+            
         return httpSecurity.build();
     }
 

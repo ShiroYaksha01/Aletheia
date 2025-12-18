@@ -23,16 +23,33 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException
-    {
+            throws ServletException, IOException {
+        
+        String token = null;
         String header = request.getHeader("Authorization");
-        if (header != null && header.startsWith("Bearer ")){
-            String token = header.substring(7);
+
+        // 1. Check Header
+        if (header != null && header.startsWith("Bearer ")) {
+            token = header.substring(7);
+        } 
+        // 2. Check Cookies (for Thymeleaf/Browser navigation)
+        else if (request.getCookies() != null) {
+            for (var cookie : request.getCookies()) {
+                if ("jwt".equals(cookie.getName())) {
+                    token = cookie.getValue();
+                }
+            }
+        }
+
+        if (token != null) {
             String username = jwtUtil.extractUsername(token);
-            if (username != null && header.startsWith("Bearer ")){
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
-                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(username, null, userDetails.getAuthorities());
-                SecurityContextHolder.getContext().setAuthentication(auth);
+                if (jwtUtil.validateToken(token, userDetails)) { // Ensure you have a validation check
+                    UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities());
+                    SecurityContextHolder.getContext().setAuthentication(auth);
+                }
             }
         }
         filterChain.doFilter(request, response);
