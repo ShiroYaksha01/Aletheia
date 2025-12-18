@@ -1,11 +1,13 @@
-# Aletheia 
-## Reseach Paper Submission and Review System
+# Week 1 Report
 
-A system for researchers to upload papers, reviewers to evaluate them, and admins to manage 
-assignments.
-1.  Security and Authentication Lead – Handles login, roles.
-2.  Handles main entity CRUD.
-3.  Handles secondary module CRUD.
-4. Frontend/Thymeleaf – Templates, access control, help developing.
-5. Database
+<p>This week which is week 1 of the project we have finished setup our project and create tables for our database. </p>
 
+Week 1 progress:
+- Setha:
+    - Setup the project
+- Phayuk -> 
+    - Change Java version from 21 to 25
+    - Changing the project folder structure in github
+    - Config DB
+- Kimheng:
+    - Add and configure the dependencies for db
