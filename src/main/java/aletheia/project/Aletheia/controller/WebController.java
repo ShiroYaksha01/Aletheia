@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import aletheia.project.Aletheia.dto.LoginRequest;
 import aletheia.project.Aletheia.dto.RegisterRequest;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @Controller
 public class WebController {
@@ -25,4 +27,10 @@ public class WebController {
     public String dashboard() {
         return "pages/dashboard";
     }
+
+    @GetMapping("/create")
+    public String getMethodName() {
+        return "papers/create";
+    }
+    
 }
