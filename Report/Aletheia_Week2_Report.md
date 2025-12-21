@@ -5,6 +5,7 @@
     - update DB tables
     - update the dependencies for spring boot 4.0.0
     - design use case and activity diagram
+    - Feat: PaperContoller, PaperEntity, PaperService, PaperRepository
 - Pheaktra:
     - Add security Register and Login
 - Kity:
