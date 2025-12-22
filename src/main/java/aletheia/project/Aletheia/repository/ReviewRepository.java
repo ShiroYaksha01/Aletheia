@@ -42,18 +42,18 @@ public interface ReviewRepository extends JpaRepository<ReviewEntity, Long> {
     Optional<ReviewEntity> findByIdWithDetails(@Param("id") Long id);
     
     // Find reviews for paper with reviewer details
-    @Query("SELECT r FROM ReviewEntity r JOIN FETCH r.reviewer WHERE r.paperId = :paperId")
+    @Query("SELECT r FROM ReviewEntity r JOIN FETCH r.reviewer WHERE r.paper.id = :paperId")
     List<ReviewEntity> findByPaperIdWithReviewer(@Param("paperId") Long paperId);
     
     // Find reviews by reviewer with paper details
-    @Query("SELECT r FROM ReviewEntity r JOIN FETCH r.paper WHERE r.reviewerId = :reviewerId")
+    @Query("SELECT r FROM ReviewEntity r JOIN FETCH r.paper WHERE r.reviewer.id = :reviewerId")
     List<ReviewEntity> findByReviewerIdWithPaper(@Param("reviewerId") Long reviewerId);
     
     // Check if reviewer has already reviewed the paper
     boolean existsByPaperIdAndReviewerId(Long paperId, Long reviewerId);
     
     // Get average score for a paper
-    @Query("SELECT AVG(r.score) FROM ReviewEntity r WHERE r.paperId = :paperId")
+    @Query("SELECT AVG(r.score) FROM ReviewEntity r WHERE r.paper.id = :paperId")
     BigDecimal getAverageScoreByPaperId(@Param("paperId") Long paperId);
     
     // Count reviews for paper
