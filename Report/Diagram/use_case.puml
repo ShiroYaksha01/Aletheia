@@ -1,0 +1,62 @@
+@startuml aletheia_use_case_diagram
+title Aletheia Paper Review System - Use Case Diagram
+left to right direction
+
+actor Researcher
+actor Reviewer
+actor Admin
+
+usecase (Register / Login) as UC1
+
+rectangle "Researcher Functions" {
+    usecase (Submit Paper) as UC2
+    usecase (View Submission Status) as UC3
+    usecase (Update Submission) as UC4
+    usecase (Withdraw Submission) as UC5
+}
+
+rectangle "Reviewer Functions" {
+    usecase (View Assigned Papers) as UC6
+    usecase (Submit Review) as UC7
+    usecase (Update Review) as UC8
+}
+
+rectangle "Admin Functions" {
+    usecase (Manage Users) as UC9
+    usecase (Assign Reviewers) as UC10
+    usecase (View All Papers) as UC11
+    usecase (View All Reviews) as UC12
+    usecase (Generate Reports) as UC13
+}
+
+usecase (Authenticate User) as UC14
+usecase (Validate Paper Format) as UC15
+
+Researcher --> UC1
+Researcher --> UC2
+Researcher --> UC3
+Researcher --> UC4
+Researcher --> UC5
+
+Reviewer --> UC1
+Reviewer --> UC6
+Reviewer --> UC7
+Reviewer --> UC8
+
+Admin --> UC1
+Admin --> UC9
+Admin --> UC10
+Admin --> UC11
+Admin --> UC12
+Admin --> UC13
+
+' Include relationships
+UC1 ..> UC14 : <<include>>
+UC2 ..> UC15 : <<include>>
+UC10 ..> UC11 : <<include>>
+
+' Extend relationships
+UC8 ..> UC7 : <<extend>>
+UC3 ..> UC2 : <<extend>>
+
+@enduml

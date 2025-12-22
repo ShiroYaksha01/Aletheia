@@ -1,0 +1,101 @@
+@startuml aletheia_activity_diagram
+title Aletheia Paper Review System - Activity Diagram
+
+|User|
+start
+:Access system;
+
+|System|
+:Display login page;
+
+|User|
+repeat
+  :Enter credentials;
+  :Click Login;
+  |System|
+backward: Display error message if invalid;
+repeat while (Credentials valid?) is (no)
+    ->yes;
+    :Validate credentials;
+    :Authenticate user;
+    :Load user role;
+
+
+if (Role?) then (Researcher)
+|Researcher|
+  :View dashboard;
+  :Submit paper;
+  note right
+    CRUD validation:
+    - Title required
+    - Abstract required
+    - PDF format only
+    - File size limit
+  end note
+  
+  |System|
+  :Validate paper format;
+  if (Paper valid?) then (yes)
+    :Store paper in database;
+    :Set status "Pending Review";
+    :Send confirmation email;
+  else (no)
+    :Display validation errors;
+  endif
+  
+  |Researcher|
+  :View submission status;
+  stop
+
+else if (Role?) then (Reviewer)
+  |Reviewer|
+  :View assigned papers;
+  :Read paper details;
+  :Submit review form;
+  note right
+    CRUD validation:
+    - Rating (1-10)
+    - Comments required
+    - Recommendation
+  end note
+  
+  |System|
+  :Validate review data;
+  if (Review valid?) then (yes)
+    :Store review;
+    :Update paper status;
+    :Notify researcher;
+  else (no)
+    :Display validation errors;
+  endif
+  
+  |Reviewer|
+  :View review history;
+  stop
+
+else if (Role?) then (Admin)
+  |Admin|
+  :View dashboard;
+  :Manage users (CRUD);
+  :View all papers;
+  :Assign reviewers;
+  note right
+    Authorization check:
+    Only Admin role
+  end note
+  
+  |System|
+  :Create review assignment;
+  :Send notification to reviewer;
+  
+  |Admin|
+  :View all reviews;
+  :Generate reports;
+  stop
+else
+    |System|
+    :Display error "Unknown role";
+    stop
+endif
+
+@enduml

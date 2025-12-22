@@ -11,3 +11,4 @@ Week 1 progress:
     - Config DB
 - Kimheng:
     - Add and configure the dependencies for db
+    - Fix the gradle build able to work for all members
