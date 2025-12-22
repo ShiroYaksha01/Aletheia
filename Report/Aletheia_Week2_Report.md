@@ -9,3 +9,8 @@
 - Kity:
     - complete ui & fix controller
     - organize the src folders structure
+
+- Phayuk:
+    - created repositories
+    - created entities
+    - drafted controller (no logic yet)
