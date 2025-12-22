@@ -52,7 +52,7 @@ public interface AssignmentRepository extends JpaRepository<AssignmentEntity, Lo
     Optional<AssignmentEntity> findByIdWithDetails(@Param("id") Long id);
     
     // Find reviewer assignments with paper details
-    @Query("SELECT a FROM AssignmentEntity a JOIN FETCH a.paper WHERE a.reviewerId = :reviewerId")
+    @Query("SELECT a FROM AssignmentEntity a JOIN FETCH a.paper WHERE a.reviewer.id = :reviewerId")
     List<AssignmentEntity> findByReviewerIdWithPaper(@Param("reviewerId") Long reviewerId);
     
     // Check if reviewer is already assigned to paper
