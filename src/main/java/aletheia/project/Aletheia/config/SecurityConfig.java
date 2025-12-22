@@ -56,7 +56,7 @@ public class SecurityConfig {
             .authenticationProvider(authProvider())
             .authorizeHttpRequests(auth -> auth
                 // 1. Only allow these without login
-                .requestMatchers("/login", "/register").permitAll()
+                .requestMatchers("/login", "/register", "/login-process", "/register-process").permitAll()
                 .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                 // 2. Everything else requires authentication
                 .anyRequest().authenticated()
