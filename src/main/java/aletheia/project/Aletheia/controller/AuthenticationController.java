@@ -89,7 +89,7 @@ public class AuthenticationController {
         cookie.setMaxAge(3600);
         response.addCookie(cookie);
 
-        return "redirect:/login"; 
+        return "redirect:/dashboard"; // Redirect to your home/dashboard page
     }
 
 }

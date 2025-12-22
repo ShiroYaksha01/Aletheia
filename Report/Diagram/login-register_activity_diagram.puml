@@ -1,0 +1,71 @@
+@startuml authentication_activity_diagram
+title Aletheia Paper Review System - Login/Register Activity Diagram
+start
+
+:User accesses system;
+
+if (Has account?) then (yes)
+  repeat
+    :User selects Login;
+    :Enter email and password;
+    
+    :System validates input format;
+    
+    if (Format valid?) then (yes)
+      :System checks credentials\nin database;
+      
+      if (Credentials valid?) then (yes)
+        :Generate session token;
+        :Store session data;
+        :Redirect to dashboard;
+        :Display user role\n(Researcher/Reviewer/Admin);
+        stop
+      else (no)
+        :Display error message\n"Invalid credentials";
+        :Increment failed attempt counter;
+        
+        if (Failed attempts > 3?) then (yes)
+          ' :Lock account temporarily;
+          ' :Send notification email;
+          :Display security alert;
+          note right: lock the login attempts for 60 seconds
+          if (Wait for lockout period?) then (yes)
+            :Wait for 60 seconds;
+          else (no)
+            :exit process;
+            stop
+          endif
+        endif
+      endif
+    else (no)
+      :Display error message\n"Invalid input format";
+    endif
+  repeat while (Try again?) is (yes)
+  stop
+  
+else (no)
+  :User selects Register;
+  :Enter registration details\n(name, email, password, role);
+  
+  :System validates input;
+  
+  if (Input valid?) then (yes)
+    :Check if email exists;
+    
+    if (Email already exists?) then (yes)
+      :Display error\n"Email already registered";
+      stop
+    else (no)
+      :Hash password;
+      :Create user account;
+      ' :Send verification email; 
+      :Display success message;
+      stop
+    endif
+  else (no)
+    :Display validation errors;
+    stop
+  endif
+endif
+
+@enduml
