@@ -33,25 +33,34 @@ public class JwtFilter extends OncePerRequestFilter {
             token = header.substring(7);
         } 
         // 2. Check Cookies (for Thymeleaf/Browser navigation)
-        else if (request.getCookies() != null) {
-            for (var cookie : request.getCookies()) {
-                if ("jwt".equals(cookie.getName())) {
-                    token = cookie.getValue();
+        if (token == null && request.getCookies() != null) {
+                for (var cookie : request.getCookies()) {
+                    if ("jwt".equals(cookie.getName())) {
+                        token = cookie.getValue();
+                    }
                 }
             }
-        }
 
-        if (token != null) {
-            String username = jwtUtil.extractUsername(token);
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
-                if (jwtUtil.validateToken(token, userDetails)) { // Ensure you have a validation check
-                    UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                            userDetails, null, userDetails.getAuthorities());
-                    SecurityContextHolder.getContext().setAuthentication(auth);
+        if (token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            try {
+                // Wrap this in try-catch to prevent 500 Errors when token expires
+                String username = jwtUtil.extractUsername(token);
+                
+                if (username != null) {
+                    UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
+                    if (jwtUtil.validateToken(token, userDetails)) {
+                        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                                userDetails, null, userDetails.getAuthorities());
+                        SecurityContextHolder.getContext().setAuthentication(auth);
+                    }
                 }
+            } catch (Exception e) {
+                // Log error if needed, but DO NOT crash. 
+                // Just let the request proceed as "anonymous", so SecurityConfig sends them to login.
+                System.out.println("JWT Validation failed: " + e.getMessage());
             }
         }
+        
         filterChain.doFilter(request, response);
     }
 }
