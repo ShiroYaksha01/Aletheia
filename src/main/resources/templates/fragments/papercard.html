@@ -1,0 +1,27 @@
+<div th:fragment="papercard(paper)" 
+     class="flex flex-col rounded-xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+    <div class="p-6">
+        <div class="mb-4 flex items-start justify-between">
+            <span class="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700" 
+                  th:text="${paper.category}">Category</span>
+            
+            <span th:switch="${paper.status}" class="text-xs font-semibold">
+                <span th:case="'accepted'" class="text-emerald-600">Accepted</span>
+                <span th:case="'under_review'" class="text-amber-600">Under Review</span>
+                <span th:case="'revision_required'" class="text-rose-600">Revision Required</span>
+                <span th:case="*" class="text-slate-500">Submitted</span>
+            </span>
+        </div>
+        
+        <h4 class="mb-2 text-lg font-bold leading-tight text-slate-900" th:text="${paper.title}">Paper Title</h4>
+        <p class="mb-4 line-clamp-2 text-sm text-slate-500" th:text="${paper.abstractText}">Abstract...</p>
+        
+        <div class="flex items-center justify-between border-t border-slate-100 pt-4">
+            <div class="flex -space-x-2">
+                <div class="h-6 w-6 rounded-full bg-slate-200 border-2 border-white"></div>
+                <div class="h-6 w-6 rounded-full bg-slate-300 border-2 border-white"></div>
+            </div>
+            <span class="text-xs text-slate-400" th:text="${paper.submittedDate}">Dec 15, 2024</span>
+        </div>
+    </div>
+</div>

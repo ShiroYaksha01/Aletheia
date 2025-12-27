@@ -53,6 +53,7 @@ public class SecurityConfig {
         httpSecurity
             .csrf(csrf -> csrf.disable()) // Enable this later for production security
             .cors(Customizer.withDefaults())
+            
             .authenticationProvider(authProvider())
             .authorizeHttpRequests(auth -> auth
                 // 1. Only allow these without login

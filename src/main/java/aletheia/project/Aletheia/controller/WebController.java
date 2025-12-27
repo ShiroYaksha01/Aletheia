@@ -5,6 +5,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import aletheia.project.Aletheia.dto.LoginRequest;
+import aletheia.project.Aletheia.dto.PaperRequest;
 import aletheia.project.Aletheia.dto.RegisterRequest;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -28,9 +29,10 @@ public class WebController {
         return "pages/dashboard";
     }
 
-    @GetMapping("/create")
-    public String getMethodName() {
-        return "papers/create";
+    @GetMapping("/paper-form")
+    public String createPaper(Model model) {
+        model.addAttribute("paperRequest", new PaperRequest());
+        return "pages/createpaper";
     }
     
 }
