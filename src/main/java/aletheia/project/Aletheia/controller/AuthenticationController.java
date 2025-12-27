@@ -54,7 +54,6 @@ public class AuthenticationController {
                 Cookie cookie = new Cookie("jwt", token);
                 cookie.setHttpOnly(true); // Prevents JavaScript from stealing the token
                 cookie.setPath("/");
-                cookie.setMaxAge(3600); // Set expiry (e.g., 1 hour)
                 response.addCookie(cookie);
 
                 return "redirect:/dashboard"; // Redirect to your home/dashboard page
