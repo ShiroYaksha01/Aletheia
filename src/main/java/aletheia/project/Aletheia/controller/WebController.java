@@ -70,9 +70,14 @@ public class WebController {
     }
 
     @GetMapping("/paper-form")
-    public String createPaper(Model model) {
+    public String createPaperPage(Model model) {
         model.addAttribute("paperRequest", new PaperRequest());
         return "pages/createpaper";
+    }
+    
+    @GetMapping("/reviews/list")
+    public String reviewList() {
+        return "pages/reviewlist";
     }
     
 }

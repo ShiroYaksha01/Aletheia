@@ -2,135 +2,9 @@
 <html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
   layout:decorate="~{layout/index.html}" lang="en">
 <head>
-        <!-- <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script> -->
-    <!-- <style>
-        .form-container {
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .form-title {
-            margin-bottom: 30px;
-            color: #333;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        label {
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #555;
-        }
-        .form-control {
-            border-radius: 4px;
-            border: 1px solid #ddd;
-        }
-        .form-control:focus {
-            border-color: #007bff;
-            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
-        }
-        .text-danger {
-            font-size: 0.875rem;
-            margin-top: 5px;
-        }
-        .alert {
-            margin-bottom: 20px;
-        }
-        .file-input-label {
-            display: inline-block;
-            margin-top: 10px;
-        }
-        .btn-group-custom {
-            display: flex;
-            gap: 10px;
-            margin-top: 30px;
-        }
-        .btn-submit {
-            flex: 1;
-        }
-        .btn-cancel {
-            flex: 1;
-        }
-        small {
-            color: #6c757d;
-        }
-    </style> -->
-</head>
+    </head>
 <body>
     
-    <!-- <div layout:fragment="content" class="container">
-        <div class="form-container">
-            <h1 class="form-title">Submit New Paper</h1>
-             -->
-            <!-- Error Message -->
-            <!-- <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-                <strong>Error:</strong> <span th:text="${error}"></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div> -->
-            
-            <!-- Success Message -->
-            <!-- <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
-                <strong>Success:</strong> <span th:text="${success}"></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div> -->
-            
-            <!-- Form -->
-            <!-- <form th:action="@{/papers/create}" method="post" th:object="${paperRequest}" enctype="multipart/form-data" novalidate> -->
-                <!-- Title Field -->
-                <!-- <div class="form-group">
-                    <label for="title" class="form-label">Paper Title <span style="color: #dc3545;">*</span></label>
-                    <input type="text" 
-                           id="title" 
-                           th:field="*{title}" 
-                           class="form-control" 
-                           placeholder="Enter the title of your paper"
-                           required>
-                    <small class="form-text text-muted">Minimum 5, maximum 255 characters.</small>
-                    <div class="text-danger" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
-                </div> -->
-                
-                <!-- Abstract Field -->
-                <!-- <div class="form-group">
-                    <label for="abstractText" class="form-label">Abstract <span style="color: #dc3545;">*</span></label>
-                    <textarea id="abstractText" 
-                              th:field="*{abstractText}" 
-                              rows="8" 
-                              class="form-control"
-                              placeholder="Enter a comprehensive abstract of your paper (50-5000 characters)"
-                              required></textarea>
-                    <small class="form-text text-muted">Minimum 50, maximum 5000 characters.</small>
-                    <div class="text-danger" th:if="${#fields.hasErrors('abstractText')}" th:errors="*{abstractText}"></div>
-                </div> -->
-                
-                <!-- File Upload Field
-                <div class="form-group">
-                    <label for="file" class="form-label">Upload PDF <span style="color: #dc3545;">*</span></label>
-                    <input type="file" 
-                           id="file" 
-                           name="file" 
-                           accept=".pdf" 
-                           class="form-control"
-                           required>
-                    <small class="form-text text-muted d-block file-input-label">
-                        <strong>Accepted format:</strong> PDF only
-                        <br><strong>Maximum file size:</strong> 10MB
-                    </small>
-                </div> -->
-                
-                <!-- Buttons -->
-                <!-- <div class="btn-group-custom">
-                    <button type="submit" class="btn btn-primary btn-submit">
-                        <i class="bi bi-check-circle"></i> Submit Paper
-                    </button>
-                    <a th:href="@{/dashboard}" class="btn btn-secondary btn-cancel">
-                        <i class="bi bi-x-circle"></i> Cancel
-                    </a>
-                </div>
-            </form>
-        </div>
-    </div> -->
     <main layout:fragment="content" class="min-h-screen w-full px-6 py-8 font-sans text-black">
         <div class="mx-auto w-full">
             <div class="mb-8 text-center">
@@ -141,17 +15,37 @@
                     Fill out the form below to submit your research paper for peer review.
                 </p>
             </div>
-            <!-- Error Message -->
-            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-                <strong>Error:</strong> <span th:text="${error}"></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+
+            <div th:if="${error}" class="mb-6 rounded-lg bg-red-50 p-4 text-red-800 dark:bg-red-900/30 dark:text-red-400" role="alert">
+                <div class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="font-medium">Error:</span>&nbsp;<span th:text="${error}"></span>
+                </div>
             </div>
             
-            <!-- Success Message -->
-            <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
-                <strong>Success:</strong> <span th:text="${success}"></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <div th:if="${#fields.hasErrors('${paperRequest.*}')}" class="mb-6 rounded-lg bg-red-50 p-4 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                <div class="flex items-center mb-2">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="font-medium">Please correct the following errors:</span>
+                </div>
+                <ul class="list-disc list-inside text-sm ml-5">
+                    <li th:each="err : ${#fields.errors('${paperRequest.*}')}" th:text="${err}"></li>
+                </ul>
             </div>
+            
+            <div th:if="${success}" class="mb-6 rounded-lg bg-green-50 p-4 text-green-800 dark:bg-green-900/30 dark:text-green-400" role="alert">
+                <div class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="font-medium">Success:</span>&nbsp;<span th:text="${success}"></span>
+                </div>
+            </div>
+
             <form th:action="@{/papers/create}" method="post" th:object="${paperRequest}" enctype="multipart/form-data" novalidate id="submission-form">
                 <div class="space-y-6">
                     
@@ -163,156 +57,141 @@
                         
                         <div class="space-y-4">
                             <div class="space-y-2">
-                            <label for="title" class="text-sm font-medium">Paper Title *</label>
-                            <input 
-                                id="title" 
-                                type="text" 
-                                th:field="*{title}" 
-                                required 
-                                placeholder="Enter the title of your paper" 
-                                class="flex h-10 w-full rounded-md border border-slate-200 bg-transparent px-3 py-2 text-sm ring-offset-white focus:outline-none focus:ring-2 focus:ring-blue-600 dark:border-slate-800 dark:ring-offset-slate-950"
-                            />
-                            </div>
-
-                            <div class="space-y-2">
-                            <label for="abstract" class="text-sm font-medium">Abstract *</label>
-                            <textarea 
-                                id="abstract" 
-                                rows="6" 
-                                th:field="*{abstractText}" 
-                                required 
-                                placeholder="Provide a brief summary of your research (250-500 words)" 
-                                class="flex min-h-[120px] w-full rounded-md border border-slate-200 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 dark:border-slate-800"
-                            ></textarea>
-                            </div>
-
-                            <!-- <div class="grid gap-4 sm:grid-cols-2">
-                            <div class="space-y-2">
-                                <label for="category" class="text-sm font-medium">Category *</label>
-                                <select id="category" required class="flex h-10 w-full rounded-md border border-slate-200 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 dark:border-slate-800">
-                                <option value="" disabled selected>Select a category</option>
-                                <option value="computer-science">Computer Science</option>
-                                <option value="biology">Biology</option>
-                                <option value="physics">Physics</option>
-                                <option value="mathematics">Mathematics</option>
-                                </select>
-                            </div>
-
-                            <div class="space-y-2">
-                                <label for="type" class="text-sm font-medium">Paper Type *</label>
-                                <select id="type" required class="flex h-10 w-full rounded-md border border-slate-200 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 dark:border-slate-800">
-                                <option value="" disabled selected>Select paper type</option>
-                                <option value="research">Research Article</option>
-                                <option value="review">Review Paper</option>
-                                <option value="case-study">Case Study</option>
-                                <option value="short-communication">Short Communication</option>
-                                </select>
-                            </div>
-                            </div> -->
-
-                            <!-- <div class="space-y-2">
-                            <label class="text-sm font-medium">Keywords</label>
-                            <div class="flex gap-2">
+                                <label for="title" class="text-sm font-medium">Paper Title *</label>
                                 <input 
-                                type="text" 
-                                placeholder="Add a keyword" 
-                                class="flex h-10 w-full rounded-md border border-slate-200 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 dark:border-slate-800"
+                                    id="title" 
+                                    type="text" 
+                                    th:field="*{title}" 
+                                    required 
+                                    placeholder="Enter the title of your paper" 
+                                    class="flex h-10 w-full rounded-md border border-slate-200 bg-transparent px-3 py-2 text-sm ring-offset-white focus:outline-none focus:ring-2 focus:ring-blue-600 dark:border-slate-800 dark:ring-offset-slate-950"
+                                    th:classappend="${#fields.hasErrors('title')} ? 'border-red-500 focus:ring-red-500' : ''"
                                 />
-                                <button type="button" class="inline-flex items-center justify-center rounded-md border border-slate-200 bg-transparent px-4 py-2 text-sm font-medium hover:bg-slate-100 dark:border-slate-800 dark:hover:bg-slate-800">
-                                Add
-                                </button>
+                                <p th:if="${#fields.hasErrors('title')}" th:errors="*{title}" class="text-xs text-red-500"></p>
                             </div>
-                            <div class="mt-2 flex flex-wrap gap-2">
-                                <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-800 dark:bg-slate-800 dark:text-slate-200">
-                                Machine Learning
-                                <button type="button" class="ml-1 rounded-full outline-none hover:text-red-500">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                                </button>
-                                </span>
+
+                            <div class="space-y-2">
+                                <label for="abstract" class="text-sm font-medium">Abstract *</label>
+                                <textarea 
+                                    id="abstract" 
+                                    rows="6" 
+                                    th:field="*{abstractText}" 
+                                    required 
+                                    placeholder="Provide a brief summary of your research (250-500 words)" 
+                                    class="flex min-h-[120px] w-full rounded-md border border-slate-200 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 dark:border-slate-800"
+                                    th:classappend="${#fields.hasErrors('abstractText')} ? 'border-red-500 focus:ring-red-500' : ''"
+                                ></textarea>
+                                <p th:if="${#fields.hasErrors('abstractText')}" th:errors="*{abstractText}" class="text-xs text-red-500"></p>
                             </div>
-                            </div> -->
                         </div>
                     </div>
-
-                    <!-- <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950">
-                    <div class="mb-4">
-                        <h2 class="text-xl font-semibold">Authors</h2>
-                        <p class="text-sm text-slate-500">Add all contributing authors in order of contribution.</p>
-                    </div>
-                    
-                    <div class="space-y-4">
-                        <div class="flex gap-2">
-                        <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-sm font-medium text-slate-500 dark:bg-slate-800">
-                            1
-                        </div>
-                        <input 
-                            type="text" 
-                            placeholder="Author name and affiliation" 
-                            required 
-                            class="flex h-10 w-full rounded-md border border-slate-200 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 dark:border-slate-800"
-                        />
-                        </div>
-
-                        <button type="button" class="inline-flex w-full items-center justify-center gap-2 rounded-md border border-dashed border-slate-300 bg-transparent px-4 py-2 text-sm font-medium hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800/50">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-                        Add Another Author
-                        </button>
-                    </div>
-                    </div> -->
 
                     <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                    <div class="mb-4">
-                        <h2 class="text-xl font-semibold">Upload Manuscript</h2>
-                        <p class="text-sm text-slate-500">Upload your paper in PDF format (max 10MB).</p>
-                    </div>
+                        <div class="mb-4">
+                            <h2 class="text-xl font-semibold">Upload Manuscript</h2>
+                            <p class="text-sm text-slate-500">Upload your paper in PDF format (max 10MB).</p>
+                        </div>
 
-                    <div class="relative">
-                        <input type="file" name="file" id="file" class="sr-only" accept=".pdf" />
-                        <label for="file" class="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-100 p-8 transition-colors hover:border-blue-400 hover:bg-slate-150">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-3 text-slate-400"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
-                            <p class="mb-1 text-sm font-medium">Click to upload or drag and drop</p>
-                            <p class="text-xs text-slate-500">PDF, DOC, or DOCX (max 10MB)</p>
-                        </label>
-                    </div>
+                        <div class="relative">
+                            <input type="file" name="file" id="file" class="sr-only" accept=".pdf" />
+                            
+                            <label for="file" id="file-label" class="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 p-8 transition-colors hover:border-blue-400 hover:bg-slate-100">
+                                
+                                <svg id="icon-upload" xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-3 text-slate-400">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/>
+                                </svg>
+                                
+                                <svg id="icon-file" xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-3 text-blue-500 hidden">
+                                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/>
+                                </svg>
+
+                                <p id="file-name-display" class="mb-1 text-sm font-medium text-slate-700">Click to upload</p>
+                                <p id="file-type-hint" class="text-xs text-slate-500">PDF(max 10MB)</p>
+                            </label>
+                        </div>
                     </div>
 
                     <div class="flex flex-col gap-4 sm:flex-row sm:justify-end">
-                    <button type="button" class="inline-flex h-11 items-center justify-center rounded-md border border-slate-200 bg-transparent px-8 text-sm font-medium transition-colors hover:bg-slate-100">
-                        Save as Draft
-                    </button>
-                    <button type="submit" class="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-blue-600 px-8 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                        Submit for Review
-                    </button>
+                        <button type="button" class="inline-flex h-11 items-center justify-center rounded-md border border-slate-200 bg-transparent px-8 text-sm font-medium transition-colors hover:bg-slate-100">
+                            Save as Draft
+                        </button>
+                        <button type="submit" class="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-blue-600 px-8 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            Submit for Review
+                        </button>
                     </div>
-
                 </div>
             </form>
-        </div>
-    </main>
 
-    <script>
-        // Client-side validation
-        document.querySelector('form').addEventListener('submit', function(e) {
-            const fileInput = document.getElementById('file');
-            if (fileInput.files.length > 0) {
-                const file = fileInput.files[0];
-                
-                // Check file type
-                if (file.type !== 'application/pdf') {
-                    e.preventDefault();
-                    alert('Only PDF files are allowed.');
-                    return false;
+            <script>
+                // 1. File Name & Icon Logic
+                const fileInput = document.getElementById('file');
+                const fileNameDisplay = document.getElementById('file-name-display');
+                const fileTypeHint = document.getElementById('file-type-hint');
+                const fileLabel = document.getElementById('file-label');
+                const iconUpload = document.getElementById('icon-upload');
+                const iconFile = document.getElementById('icon-file');
+
+                if (fileInput) {
+                    fileInput.addEventListener('change', function(e) {
+                        if (this.files && this.files.length > 0) {
+                            const file = this.files[0];
+                            
+                            // Update Text
+                            fileNameDisplay.textContent = file.name;
+                            fileNameDisplay.classList.add('text-blue-600', 'font-semibold');
+                            
+                            // Show file size
+                            const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                            fileTypeHint.textContent = `Selected: ${fileSizeMB} MB`;
+                            
+                            // Visual feedback (Box color)
+                            fileLabel.classList.add('border-blue-400', 'bg-blue-50');
+                            fileLabel.classList.remove('border-slate-200', 'bg-slate-50');
+
+                            // Swap Icons
+                            iconUpload.classList.add('hidden');
+                            iconFile.classList.remove('hidden');
+
+                        } else {
+                            // Reset Text
+                            fileNameDisplay.textContent = "Click to upload or drag and drop";
+                            fileNameDisplay.classList.remove('text-blue-600', 'font-semibold');
+                            fileTypeHint.textContent = "PDF, DOC, or DOCX (max 10MB)";
+                            
+                            // Reset Box color
+                            fileLabel.classList.remove('border-blue-400', 'bg-blue-50');
+                            fileLabel.classList.add('border-slate-200', 'bg-slate-50');
+
+                            // Reset Icons
+                            iconUpload.classList.remove('hidden');
+                            iconFile.classList.add('hidden');
+                        }
+                    });
                 }
-                
-                // Check file size (10MB)
-                if (file.size > 10 * 1024 * 1024) {
-                    e.preventDefault();
-                    alert('File size must not exceed 10MB.');
-                    return false;
+
+                // 2. Client-side Validation
+                const form = document.getElementById('submission-form');
+                if (form) {
+                    form.addEventListener('submit', function(e) {
+                        if (fileInput.files.length > 0) {
+                            const file = fileInput.files[0];
+                            
+                            if (file.type !== 'application/pdf') {
+                                e.preventDefault();
+                                alert('Only PDF files are allowed.');
+                                return false;
+                            }
+                            
+                            if (file.size > 10 * 1024 * 1024) {
+                                e.preventDefault();
+                                alert('File size must not exceed 10MB.');
+                                return false;
+                            }
+                        }
+                    });
                 }
-            }
-        });
-    </script>
+            </script>
+    </main>
 </body>
 </html>

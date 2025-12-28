@@ -63,11 +63,11 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
             // 3. Redirect to /login if the user is not authenticated
-            .exceptionHandling(ex -> ex
-                .authenticationEntryPoint((request, response, authException) -> {
-                    response.sendRedirect("/login");
-                })
-            )
+            // .exceptionHandling(ex -> ex
+            //     .authenticationEntryPoint((request, response, authException) -> {
+            //         response.sendRedirect("/login");
+            //     })
+            // )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
             
         return httpSecurity.build();
