@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+    <span th:fragment="statusBadge(status)" 
+          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border"
+          th:classappend="${
+            status == 'accepted' ? 'bg-green-500/15 text-green-500 border-green-500/20' :
+            status == 'rejected' ? 'bg-red-500/15 text-red-500 border-red-500/20' :
+            status == 'under_review' ? 'bg-blue-500/15 text-blue-500 border-blue-500/20' :
+            'bg-yellow-500/15 text-yellow-500 border-yellow-500/20'
+          }"
+          th:text="${#strings.capitalize(#strings.replace(status, '_', ' '))}">
+        Status
+    </span>
+
+    <div th:fragment="statCard(title, value, icon)" class="glass-card rounded-xl p-6">
+        <div class="flex items-start justify-between">
+            <div class="space-y-2">
+                <p class="text-sm text-muted-foreground" th:text="${title}">Title</p>
+                <p class="text-3xl font-bold text-foreground" th:text="${value}">0</p>
+            </div>
+            <div class="p-3 rounded-lg bg-gray-800/50 text-teal-500">
+                <i th:class="'lucide-' + ${icon}"></i> 
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

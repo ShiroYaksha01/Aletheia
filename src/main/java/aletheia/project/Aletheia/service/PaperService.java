@@ -5,6 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List; // [Import Added]
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -26,17 +28,26 @@ public class PaperService {
         this.paperRepository = paperRepository;
     }
 
-    public PaperEntity createPaper(String title, String abstractText, MultipartFile file, UserEntity author) throws IOException {
+    // [Method Updated] Now accepts researchArea and keywords
+    public PaperEntity createPaper(String title, 
+                                   String abstractText, 
+                                   String researchArea, 
+                                   MultipartFile file, 
+                                   UserEntity author) throws IOException {
+        
         PaperEntity paper = new PaperEntity();
         paper.setTitle(title);
         paper.setAbstractText(abstractText);
+        paper.setResearchArea(researchArea); // [New Setter]
         paper.setAuthor(author);
+        paper.setStatus("PENDING");          // Good practice to set an initial status
 
         if(file != null && !file.isEmpty()) {
             String filename = saveFile(file);
             paper.setFileName(file.getOriginalFilename());
             paper.setFilePath(filename);
         }
+        
         return paperRepository.save(paper);
     }
 
@@ -46,6 +57,7 @@ public class PaperService {
             Files.createDirectories(uploadPath);
         }
 
+        // Use UUID to prevent filename collisions
         String filename = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
         Path filePath = uploadPath.resolve(filename);
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
@@ -53,4 +65,11 @@ public class PaperService {
         return filename;
     }
 
+    public List<PaperEntity> getAllPapers() {
+        return paperRepository.findAll();
+    }
+
+    public Optional<PaperEntity> findById(Long id) {
+        return paperRepository.findById(id);
+    }
 }

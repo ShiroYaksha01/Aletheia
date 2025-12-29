@@ -1,25 +1,55 @@
-<!doctype html>
-<html lang="en" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title> Research Paper Submission and Review System</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title layout:title-pattern="$CONTENT_TITLE - Aletheia">Aletheia</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        background: 'hsl(222 47% 6%)',
+                        foreground: 'hsl(210 40% 98%)',
+                        primary: 'hsl(174 72% 46%)',
+                        muted: 'hsl(222 30% 18%)',
+                        card: 'hsl(222 47% 8%)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body { background-color: hsl(222 47% 6%); color: hsl(210 40% 98%); font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass-card { background-color: hsla(222, 47%, 8%, 0.8); backdrop-filter: blur(12px); border: 1px solid hsla(222, 30%, 18%, 0.5); }
+    </style>
 </head>
-<body>
+<body class="min-h-screen bg-background text-foreground antialiased">
 
-    <div class="flex">
-        
-        <aside th:replace="~{fragments/sidebar :: sidebar}"></aside>
+    <div class="min-h-screen flex">
+        <div th:replace="~{fragments/sidebar :: sidebar}"></div>
 
-        <main layout:fragment="content"></main>
+        <main class="flex-1 transition-all duration-300 ml-64 p-6">
+            <header class="flex items-center justify-between mb-8" th:if="${pageTitle}">
+                <div>
+                    <h1 class="text-2xl font-bold text-foreground" th:text="${pageTitle}">Page Title</h1>
+                    <p class="text-sm text-muted-foreground" th:if="${pageSubtitle}" th:text="${pageSubtitle}">Subtitle</p>
+                </div>
+                <div class="flex items-center gap-3" layout:fragment="actions">
+                    </div>
+            </header>
 
+            <div layout:fragment="content"></div>
+        </main>
     </div>
 
-    <!-- <footer th:replace="fragments/footer :: footer">
-
-    </footer> -->
-
-
+    <script th:inline="javascript">
+        /* Logic to handle sidebar toggling would go here */
+    </script>
 </body>
 </html>
