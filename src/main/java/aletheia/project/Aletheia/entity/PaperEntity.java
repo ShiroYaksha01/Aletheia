@@ -25,6 +25,12 @@ public class PaperEntity {
     @Column(name = "file_name")
     private String fileName;
 
+    @Column(name = "status", nullable = false)
+    private String status;
+
+    @Column(name = "research_area", nullable = false)
+    private String researchArea;
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity author;
@@ -59,6 +65,12 @@ public class PaperEntity {
     public String getFileName() {
         return this.fileName;
     }
+    public String getStatus() {
+        return this.status;
+    }
+    public String getResearchArea() {
+        return this.researchArea;
+    }
 
     // Setters
     public void setAbstractText(String abstractText) {
@@ -78,5 +90,11 @@ public class PaperEntity {
     }
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+    public void setStatus(String status) {
+        this.status = status;
+    }
+    public void setResearchArea(String researchArea) {
+        this.researchArea = researchArea;
     }
 }

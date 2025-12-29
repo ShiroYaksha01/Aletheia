@@ -2,7 +2,7 @@ package aletheia.project.Aletheia.controller;
 
 import aletheia.project.Aletheia.dto.PaperRequest;
 import aletheia.project.Aletheia.entity.UserEntity;
-import aletheia.project.Aletheia.repository.UserRepository; // [Import Added]
+import aletheia.project.Aletheia.repository.UserRepository;
 import aletheia.project.Aletheia.service.PaperService;
 import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,9 +21,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequestMapping("/papers")
 public class PaperController {
     private final PaperService paperService;
-    private final UserRepository userRepository; // [Field Added]
+    private final UserRepository userRepository;
 
-    // [Constructor Updated] Inject UserRepository
     public PaperController(PaperService paperService, UserRepository userRepository) {
         this.paperService = paperService;
         this.userRepository = userRepository;
@@ -34,6 +33,8 @@ public class PaperController {
         @Valid @ModelAttribute PaperRequest paperRequest,
         BindingResult bindingResult,
         @RequestParam(value = "file", required = false) MultipartFile file,
+        // [ADDED] Capture the custom input field for "Other" area
+        @RequestParam(value = "customResearchArea", required = false) String customResearchArea,
         @AuthenticationPrincipal UserDetails userDetails,
         RedirectAttributes redirectAttributes,
         Model model
@@ -48,41 +49,52 @@ public class PaperController {
         if (file != null && !file.isEmpty()) {
             String contentType = file.getContentType();
             if (contentType == null || !"application/pdf".equals(contentType)) {
-                // NOTE: We cannot use rejectValue("file"...) if 'file' is not in PaperRequest DTO.
-                // Using global error instead to prevent crashes.
                 bindingResult.reject("error.file", "Only PDF files are allowed.");
             }
             if (file.getSize() > 10_000_000) {
                 bindingResult.reject("error.file", "File size must not exceed 10MB");
             }
+        } else {
+             // Optional: If file is mandatory, reject here
+             bindingResult.reject("error.file", "Paper file is required.");
         }
 
         if (bindingResult.hasErrors()) {
-            return "pages/createpaper";
+            return "papers/submit";
         }
 
         try {
-            // [FIX STARTS HERE] ------------------------------------------------
-            // Fetch the ACTUAL user entity from the database using the email
+            // 3. Fetch User
             String email = userDetails.getUsername();
             UserEntity author = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found: " + email));
-            // [FIX ENDS HERE] --------------------------------------------------
 
+            // [LOGIC ADDED] Handle Research Area (Dropdown vs Custom Input)
+            String finalResearchArea = paperRequest.getResearchArea();
+            if ("OTHER".equalsIgnoreCase(finalResearchArea) && customResearchArea != null && !customResearchArea.isBlank()) {
+                finalResearchArea = customResearchArea.trim();
+            }
+
+
+            // 4. Call Service with all data
+            // NOTE: You must update your PaperService.createPaper signature to accept these new fields!
             paperService.createPaper(
                 paperRequest.getTitle(),
                 paperRequest.getAbstractText(),
+                finalResearchArea, // Passed the processed area
                 file,
-                author // Pass the real, database-managed author
+                author
             );
 
             redirectAttributes.addFlashAttribute("success", "Paper created successfully!");
             return "redirect:/dashboard";
             
         } catch (Exception e) {
-            e.printStackTrace(); // Print error to console for debugging
+            e.printStackTrace();
             model.addAttribute("error", "Failed to upload paper: " + e.getMessage());
-            return "pages/createpaper";
+            // Important: Add the paperRequest back so the form doesn't go blank on error
+            model.addAttribute("paperRequest", paperRequest); 
+            return "papers/submit";
         }
     }
 }

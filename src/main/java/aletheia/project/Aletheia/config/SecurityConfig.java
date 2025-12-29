@@ -58,9 +58,25 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // 1. Only allow these without login
                 .requestMatchers("/login", "/register", "/login-process", "/register-process").permitAll()
-                .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
-                // 2. Everything else requires authentication
+                // 2. Role-Based Endpoints
+                // Only Admins can access /admin/**
+                .requestMatchers("/admin/**").hasRole("ADMIN")
+                
+                // Reviewers and Admins can access review management
+                .requestMatchers("/reviews/**").hasAnyRole("REVIEWER", "ADMIN")
+                
+                // Researchers (and usually others) can access paper submission
+                .requestMatchers("/paper-form", "/papers/**").hasAnyRole("RESEARCHER", "ADMIN")
+
                 .anyRequest().authenticated()
+            )
+            
+            .logout(logout -> logout
+                .logoutUrl("/logout")                 // 1. Listen for POST /logout
+                .logoutSuccessUrl("/login?logout")    // 2. Redirect to login with ?logout param
+                .deleteCookies("jwt", "JSESSIONID")   // 3. Delete cookies
+                .clearAuthentication(true)            // 4. Clear Security Context
+                .permitAll()
             )
             // 3. Redirect to /login if the user is not authenticated
             .exceptionHandling(ex -> ex

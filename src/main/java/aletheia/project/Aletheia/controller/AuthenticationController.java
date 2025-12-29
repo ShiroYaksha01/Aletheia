@@ -76,7 +76,13 @@ public class AuthenticationController {
         user.setPassword(encoder.encode(registerRequest.getPassword()));
         user.setFirstName(registerRequest.getFirstName());
         user.setLastName(registerRequest.getLastName());
-        user.setRole("USER");
+
+        String role = registerRequest.getRole();
+        if (!"REVIEWER".equals(role)) {
+            role = "RESEARCHER"; // Default to Researcher for safety
+        }
+        
+        user.setRole(role);
         user.setActive(true);
         userRepository.save(user);
 

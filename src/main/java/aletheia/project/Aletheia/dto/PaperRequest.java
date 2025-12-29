@@ -12,6 +12,15 @@ public class PaperRequest {
     @Size(min = 50, max = 5000, message = "Abstract must be between 50 and 5000 characters")
     private String abstractText;
 
+    private String status;
+    private String researchArea;
+
+    public String getResearchArea() {
+        return researchArea;
+    }
+    public String getStatus() {
+        return status;
+    }
     public String getTitle() {
         return title;
     }
@@ -28,4 +37,10 @@ public class PaperRequest {
         this.abstractText = abstractText;
     }
     
+    public void setStatus(String status) {
+        this.status = status;
+    }
+    public void setResearchArea(String researchArea) {
+        this.researchArea = researchArea;
+    }
 }
