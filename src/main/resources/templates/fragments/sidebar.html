@@ -16,13 +16,13 @@
                     <span>Dashboard</span>
                 </a>
 
-<th:block th:if="${isResearcher}">
-                    <a th:href="@{papers/my-papers}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white"
-                       th:classappend="${currentPath == 'papers/my-papers'} ? 'bg-teal-500/10 text-teal-500'">
+                <th:block th:if="${isResearcher}">
+                    <a th:href="@{/papers/my-papers}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white"
+                       th:classappend="${currentPath == '/papers/my-papers'} ? 'bg-teal-500/10 text-teal-500'">
                         <span>My Papers</span>
                     </a>
-                    <a th:href="@{papers/submit}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white"
-                       th:classappend="${currentPath == 'papers/submit'} ? 'bg-teal-500/10 text-teal-500'">
+                    <a th:href="@{/papers/submit}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white"
+                       th:classappend="${currentPath == '/papers/submit'} ? 'bg-teal-500/10 text-teal-500'">
                         <span>Submit Paper</span>
                     </a>
                 </th:block>

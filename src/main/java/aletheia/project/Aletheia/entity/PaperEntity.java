@@ -31,6 +31,9 @@ public class PaperEntity {
     @Column(name = "research_area")
     private String researchArea;
 
+    @Column(name = "keywords")
+    private String keywords;
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity author;
@@ -94,4 +97,7 @@ public class PaperEntity {
 
     public String getResearchArea() { return researchArea; }
     public void setResearchArea(String researchArea) { this.researchArea = researchArea; }
+
+    public String getKeywords() { return keywords; }
+    public void setKeywords(String keywords) { this.keywords = keywords; }
 }

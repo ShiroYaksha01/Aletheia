@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List; // [Import Added]
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -66,5 +67,9 @@ public class PaperService {
 
     public List<PaperEntity> getAllPapers() {
         return paperRepository.findAll();
+    }
+
+    public Optional<PaperEntity> findById(Long id) {
+        return paperRepository.findById(id);
     }
 }
