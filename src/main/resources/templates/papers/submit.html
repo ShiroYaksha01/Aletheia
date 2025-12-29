@@ -8,7 +8,7 @@
 <body>
 
     <div layout:fragment="content">
-        <form th:action="@{/paper-form}" method="post" th:object="${paperRequest}" enctype="multipart/form-data" novalidate class="max-w-3xl space-y-8">
+        <form th:action="@{/papers/create}" method="post" th:object="${paperRequest}" enctype="multipart/form-data" novalidate class="max-w-3xl space-y-8">
             
             <div class="glass-card rounded-xl p-6 space-y-6">
                 <h2 class="text-lg font-semibold text-white">Paper Information</h2>

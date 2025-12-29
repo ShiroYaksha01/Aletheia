@@ -15,19 +15,25 @@
                    th:classappend="${currentPath == '/dashboard'} ? 'bg-teal-500/10 text-teal-500'">
                     <span>Dashboard</span>
                 </a>
-<!-- th:if="${#lists.contains(user.roles, 'researcher')}" -->
-                <th:block>
-                    <a th:href="@{/my-papers}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white"
-                       th:classappend="${currentPath == '/my-papers'} ? 'bg-teal-500/10 text-teal-500'">
+
+<th:block th:if="${isResearcher}">
+                    <a th:href="@{papers/my-papers}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white"
+                       th:classappend="${currentPath == 'papers/my-papers'} ? 'bg-teal-500/10 text-teal-500'">
                         <span>My Papers</span>
                     </a>
-                    <a th:href="@{/paper-form}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white"
-                       th:classappend="${currentPath == '/paper-form'} ? 'bg-teal-500/10 text-teal-500'">
+                    <a th:href="@{papers/submit}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white"
+                       th:classappend="${currentPath == 'papers/submit'} ? 'bg-teal-500/10 text-teal-500'">
                         <span>Submit Paper</span>
                     </a>
                 </th:block>
-<!-- th:if="${#lists.contains(user.roles, 'admin')}" -->
-                <th:block >
+
+                <th:block th:if="${isReviewer}">
+                    <a th:href="@{/reviews/list}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white">
+                        <span>Assigned Reviews</span>
+                    </a>
+                </th:block>
+
+                <th:block th:if="${isAdmin}">
                     <a th:href="@{/users}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white">
                         <span>Users</span>
                     </a>
@@ -39,7 +45,7 @@
                     <div class="w-10 h-10 rounded-full bg-teal-500 flex items-center justify-center text-white font-medium" 
                          th:text="${#strings.substring(user.firstName, 0, 1)}">U</div>
                     <div class="flex-1 min-w-0">
-                        <p class="text-sm font-medium text-white truncate" th:text="${user.firstName}">User Name</p>
+                        <p class="text-sm font-medium text-white truncate" th:text="|${user.firstName} ${user.lastName}|">User Name</p>
                         <p class="text-xs text-gray-500 truncate" th:text="${user.email}">user@email.com</p>
                     </div>
                 </div>

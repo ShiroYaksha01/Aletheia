@@ -3,7 +3,6 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/index}">
 <head>
-    <title>My Submissions</title>
 </head>
 <body>
     
@@ -39,10 +38,10 @@
                     
                     <div class="flex items-center gap-4 text-sm text-gray-500">
                         <div class="flex items-center gap-1.5">
-                            <span>📅</span> <span th:text="${paper.createAt}">2023-01-01</span>
+                            <span>📅</span> <span th:text="${paper.submissionDate}">2023-01-01</span>
                         </div>
                         <div class="flex items-center gap-1.5">
-                            <span>👥</span> <span th:text="${paper.author}">Authors</span>
+                            <span>👥</span> <span th:text="${paper.authorNames}">Authors</span>
                         </div>
                     </div>
                     

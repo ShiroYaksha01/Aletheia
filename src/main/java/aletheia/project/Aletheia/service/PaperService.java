@@ -63,4 +63,8 @@ public class PaperService {
 
         return filename;
     }
+
+    public List<PaperEntity> getAllPapers() {
+        return paperRepository.findAll();
+    }
 }
