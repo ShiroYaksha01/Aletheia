@@ -38,24 +38,37 @@ public class WebController {
         String email = principal.getName();
         UserEntity user = userRepository.findByEmail(email).orElseThrow();
 
-        // 2. Fetch papers for this user
-        List<PaperEntity> papers = paperRepository.findByAuthorId(user.getId());
-
-        // 3. Calculate Stats
-        Map<String, Integer> stats = new HashMap<>();
-        stats.put("total", papers.size());
-        stats.put("pending", (int) papers.stream().filter(p -> "PENDING".equalsIgnoreCase(p.getStatus())).count());
-        stats.put("accepted", (int) papers.stream().filter(p -> "ACCEPTED".equalsIgnoreCase(p.getStatus())).count());
-        stats.put("rejected", (int) papers.stream().filter(p -> "REJECTED".equalsIgnoreCase(p.getStatus())).count());
-
-        // 4. Pass data to the view
-        model.addAttribute("papers", papers); // The HTML iterates over this
-        model.addAttribute("stats", stats);   // The HTML uses ${stats.total}, etc.
+        // 2. Route based on role
+        String role = user.getRole();
         
-        // BreadCrumb
-        model.addAttribute("pageTitle", "Dashboard");
-        model.addAttribute("pageSubtitle", "Overview of your research activities");
-        return "dashboard/researcher";
+        if ("ADMIN".equalsIgnoreCase(role)) {
+            model.addAttribute("pageTitle", "Admin Dashboard");
+            model.addAttribute("pageSubtitle", "System administration and user management");
+            return "dashboard/admin";
+        } else if ("REVIEWER".equalsIgnoreCase(role)) {
+            model.addAttribute("pageTitle", "Reviewer Dashboard");
+            model.addAttribute("pageSubtitle", "Review assigned papers");
+            return "dashboard/reviewer";
+        } else {
+            // Default to RESEARCHER
+            // Fetch papers for this user
+            List<PaperEntity> papers = paperRepository.findByAuthorId(user.getId());
+
+            // Calculate Stats
+            Map<String, Integer> stats = new HashMap<>();
+            stats.put("total", papers.size());
+            stats.put("pending", (int) papers.stream().filter(p -> "PENDING".equalsIgnoreCase(p.getStatus())).count());
+            stats.put("accepted", (int) papers.stream().filter(p -> "ACCEPTED".equalsIgnoreCase(p.getStatus())).count());
+            stats.put("rejected", (int) papers.stream().filter(p -> "REJECTED".equalsIgnoreCase(p.getStatus())).count());
+
+            // Pass data to the view
+            model.addAttribute("papers", papers);
+            model.addAttribute("stats", stats);
+            
+            model.addAttribute("pageTitle", "Dashboard");
+            model.addAttribute("pageSubtitle", "Overview of your research activities");
+            return "dashboard/researcher";
+        }
     }
 
 

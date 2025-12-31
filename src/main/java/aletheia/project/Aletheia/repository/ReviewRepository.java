@@ -56,6 +56,10 @@ public interface ReviewRepository extends JpaRepository<ReviewEntity, Long> {
     @Query("SELECT AVG(r.score) FROM ReviewEntity r WHERE r.paper.id = :paperId")
     BigDecimal getAverageScoreByPaperId(@Param("paperId") Long paperId);
     
+    // Count reviews that are NOT completed (Pending or In Progress)
+    @Query("SELECT COUNT(r) FROM ReviewEntity r WHERE r.reviewer.id = :reviewerId AND r.status IN ('PENDING', 'IN_PROGRESS')")
+    long countActiveReviews(@Param("reviewerId") Long reviewerId);
+
     // Count reviews for paper
     Long countByPaperId(Long paperId);
     

@@ -52,6 +52,10 @@ public class UserEntity {
         return lastName;
     }
 
+    public String getFullName() {
+        return firstName + " " + lastName;
+    }
+
     public String getRole() {
         return role;
     }
