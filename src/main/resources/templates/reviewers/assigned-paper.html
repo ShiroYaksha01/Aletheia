@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/index}">
+<head>
+    <title>Assigned Papers</title>
+</head>
+<body>
+
+    <div layout:fragment="content">
+        
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold text-white">Assigned Papers</h1>
+            <p class="text-gray-400">Papers assigned to you for review</p>
+        </div>
+
+        <form th:action="@{/reviewer/assigned-papers}" method="get" class="flex flex-col sm:flex-row gap-4 mb-6">
+            
+            <div class="relative flex-1">
+                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                <input type="text" name="search" th:value="${searchQuery}" 
+                       placeholder="Search papers by title..." 
+                       class="w-full h-10 pl-10 bg-[#020817] border border-gray-800 rounded-md text-sm text-white focus:ring-1 focus:ring-teal-500 outline-none placeholder:text-gray-600">
+            </div>
+
+            <div class="w-full sm:w-48">
+                <select name="status" onchange="this.form.submit()" 
+                        class="w-full h-10 px-3 bg-[#020817] border border-gray-800 rounded-md text-sm text-white focus:ring-1 focus:ring-teal-500 outline-none cursor-pointer">
+                    <option value="all" th:selected="${currentStatus == 'all'}">All Status</option>
+                    <option value="PENDING" th:selected="${currentStatus == 'PENDING'}">Pending</option>
+                    <option value="IN_PROGRESS" th:selected="${currentStatus == 'IN_PROGRESS'}">In Progress</option>
+                    <option value="COMPLETED" th:selected="${currentStatus == 'COMPLETED'}">Completed</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="hidden">Search</button>
+        </form>
+
+        <div class="space-y-4">
+            
+            <div th:if="${#lists.isEmpty(reviews)}" class="text-center py-12 glass-card rounded-xl border border-gray-800 bg-[#020817]/50">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-800 mb-4 text-gray-500">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                </div>
+                <h3 class="text-lg font-medium text-white mb-2">No papers found</h3>
+                <p class="text-gray-500">
+                    <span th:if="${searchQuery != null or currentStatus != 'all'}">Try adjusting your search or filters</span>
+                    <span th:unless="${searchQuery != null or currentStatus != 'all'}">You have no papers assigned for review yet.</span>
+                </p>
+            </div>
+
+            <th:block th:each="review : ${reviews}">
+                <div class="glass-card rounded-xl p-5 border border-gray-800 bg-[#020817]/60 hover:border-teal-500/30 transition-all duration-200">
+                    <div class="flex flex-col gap-4">
+                        
+                        <div class="flex items-start justify-between gap-4">
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-white line-clamp-2 mb-2" th:text="${review.paper.title}">
+                                    Paper Title
+                                </h3>
+                                
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border"
+                                      th:classappend="${
+                                        review.status == 'COMPLETED' ? 'bg-green-500/15 text-green-500 border-green-500/20' :
+                                        review.status == 'IN_PROGRESS' ? 'bg-blue-500/15 text-blue-500 border-blue-500/20' :
+                                        'bg-yellow-500/15 text-yellow-500 border-yellow-500/20'
+                                      }"
+                                      th:text="${#strings.replace(review.status, '_', ' ')}">
+                                    PENDING
+                                </span>
+                            </div>
+                            
+                            <div th:if="${review.deadline != null and review.status != 'COMPLETED'}" 
+                                 th:with="days=${review.daysLeft}"
+                                 class="shrink-0 px-3 py-1.5 rounded-lg text-sm font-medium border"
+                                 th:classappend="${days <= 3 ? 'bg-red-500/10 text-red-500 border-red-500/20' : 'bg-gray-800 text-gray-400 border-gray-700'}">
+                                <span th:text="${days}">5</span> days left
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap gap-4 text-sm text-gray-400">
+                            <div class="flex items-center gap-1.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path></svg>
+                                <span th:text="|ID: #${review.paper.id}|">ID: #123</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                <span th:text="${#temporals.format(review.deadline, 'MMM d, yyyy')}">Jan 1, 2024</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3 pt-4 border-t border-gray-800 mt-2">
+                            
+                            <a th:href="@{/papers/files/{filename}(filename=${review.paper.fileName})}" target="_blank"
+                               class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-gray-800 h-9 px-4 text-gray-300 border border-transparent hover:border-gray-700">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Download PDF
+                            </a>
+
+                            <a th:href="@{/reviews/submit/{id}(id=${review.id})}" 
+                               class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-all h-9 px-4 text-white shadow-lg ml-auto"
+                               th:classappend="${review.status == 'COMPLETED' ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gradient-to-r from-teal-600 to-blue-600 hover:opacity-90 shadow-teal-500/20'}">
+                                <span th:text="${review.status == 'COMPLETED' ? 'View Review' : 'Start Review'}">Start Review</span>
+                                <svg th:unless="${review.status == 'COMPLETED'}" class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </th:block>
+        </div>
+    </div>
+
+</body>
+</html>

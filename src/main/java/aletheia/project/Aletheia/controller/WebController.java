@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import aletheia.project.Aletheia.entity.PaperEntity;
 import aletheia.project.Aletheia.entity.UserEntity;
 import aletheia.project.Aletheia.repository.PaperRepository;
+import aletheia.project.Aletheia.repository.ReviewRepository;
 import aletheia.project.Aletheia.repository.UserRepository;
 
 
@@ -27,6 +28,8 @@ public class WebController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private ReviewRepository reviewRepository;
 
     @GetMapping("/dashboard")
     public String dashboard(Model model, Principal principal) {
@@ -44,6 +47,9 @@ public class WebController {
         if ("ADMIN".equalsIgnoreCase(role)) {
             model.addAttribute("pageTitle", "Admin Dashboard");
             model.addAttribute("pageSubtitle", "System administration and user management");
+            model.addAttribute("totalPapers", paperRepository.count());
+            model.addAttribute("totalUsers", userRepository.count());
+            model.addAttribute("totalReviews", reviewRepository.count());
             return "dashboard/admin";
         } else if ("REVIEWER".equalsIgnoreCase(role)) {
             model.addAttribute("pageTitle", "Reviewer Dashboard");

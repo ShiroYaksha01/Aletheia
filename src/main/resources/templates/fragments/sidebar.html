@@ -28,16 +28,19 @@
                 </th:block>
 
                 <th:block th:if="${isReviewer}">
-                    <a th:href="@{/reviews/list}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white">
+                    <a th:href="@{/reviews/my-reviews}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white"
+                       th:classappend="${currentPath == '/reviews/my-reviews'} ? 'bg-teal-500/10 text-teal-500'">
                         <span>Assigned Reviews</span>
                     </a>
                 </th:block>
 
                 <th:block th:if="${isAdmin}">
-                    <a th:href="@{/admin/users}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white">
+                    <a th:href="@{/admin/users}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white"
+                        th:classappend="${currentPath == '/admin/users'} ? 'bg-teal-500/10 text-teal-500'">
                         <span>Manage Users</span>
                     </a>
-                    <a th:href="@{/admin/papers}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white">
+                    <a th:href="@{/admin/papers}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white"
+                       th:classappend="${currentPath == '/admin/papers'} ? 'bg-teal-500/10 text-teal-500'">
                         <span>Manage Papers</span>
                     </a>
                 </th:block>

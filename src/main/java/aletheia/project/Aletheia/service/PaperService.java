@@ -14,18 +14,22 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import aletheia.project.Aletheia.entity.PaperEntity;
+import aletheia.project.Aletheia.entity.ReviewEntity;
 import aletheia.project.Aletheia.entity.UserEntity;
 import aletheia.project.Aletheia.repository.PaperRepository;
+import aletheia.project.Aletheia.repository.ReviewRepository;
 
 @Service
 public class PaperService {
     private final PaperRepository paperRepository;
+    private final ReviewRepository reviewRepository;
 
     @Value("${file.upload-dir:uploads/papers}")
     private String uploadDir;
 
-    public PaperService(PaperRepository paperRepository) {
+    public PaperService(PaperRepository paperRepository, ReviewRepository reviewRepository) {
         this.paperRepository = paperRepository;
+        this.reviewRepository = reviewRepository;
     }
 
     // [Method Updated] Now accepts researchArea and keywords
@@ -71,5 +75,37 @@ public class PaperService {
 
     public Optional<PaperEntity> findById(Long id) {
         return paperRepository.findById(id);
+    }
+
+    public void updatePaperStatusBasedOnReviews(Long paperId) {
+        PaperEntity paper = paperRepository.findById(paperId)
+            .orElseThrow(() -> new RuntimeException("Paper not found"));
+
+        List<ReviewEntity> reviews = reviewRepository.findByPaperId(paperId);
+
+        // If there are no reviews, do nothing
+        if (reviews.isEmpty()) {
+            return;
+        }
+
+        // Check if all reviews are completed
+        boolean allCompleted = reviews.stream().allMatch(r -> "COMPLETED".equalsIgnoreCase(r.getStatus()));
+
+        if (allCompleted) {
+            // Calculate average score
+            double averageScore = reviews.stream()
+                .mapToDouble(r -> r.getScore().doubleValue())
+                .average()
+                .orElse(0.0);
+
+            // Decide status based on average score
+            if (averageScore >= 3.0) { // Example threshold
+                paper.setStatus("ACCEPTED");
+            } else {
+                paper.setStatus("REJECTED");
+            }
+            paperRepository.save(paper);
+        }
+        // If not all reviews are completed, the status remains "UNDER_REVIEW"
     }
 }

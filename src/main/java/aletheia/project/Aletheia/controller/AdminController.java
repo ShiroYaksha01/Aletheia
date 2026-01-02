@@ -29,14 +29,7 @@ public class AdminController {
         this.paperRepository = paperRepository;
         this.reviewRepository = reviewRepository;
     }
-
-    // === DASHBOARD ===
-    @GetMapping("/dashboard")
-    public String adminDashboard(Model model) {
-        // You can add stats here later
-        return "dashboard/admin"; // Make sure this template exists
-    }
-
+    
     // === ASSIGN REVIEWERS LOGIC ===
 
     // 1. Show the Assign Page
@@ -132,5 +125,35 @@ public class AdminController {
     public String manageUsers(Model model) {
         model.addAttribute("users", userRepository.findAll());
         return "admin/users";
+    }
+
+    //  === PAPER MANAGEMENT WITH FILTERS ===
+    @GetMapping("/papers")
+    public String managePapers(@RequestParam(required = false) String search,
+                               @RequestParam(required = false, defaultValue = "all") String status,
+                               Model model) {
+        
+        // 1. Fetch All Papers
+        List<PaperEntity> papers = paperRepository.findAll();
+
+        // 2. Filter (Java Stream approach for simplicity)
+        if (search != null && !search.isEmpty()) {
+            papers = papers.stream()
+                    .filter(p -> p.getTitle().toLowerCase().contains(search.toLowerCase()) || 
+                                 p.getAuthor().getFullName().toLowerCase().contains(search.toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+
+        if (!"all".equalsIgnoreCase(status)) {
+            papers = papers.stream()
+                    .filter(p -> p.getStatus().equalsIgnoreCase(status))
+                    .collect(Collectors.toList());
+        }
+
+        model.addAttribute("papers", papers);
+        model.addAttribute("searchQuery", search);
+        model.addAttribute("currentStatus", status);
+
+        return "admin/papers"; // Maps to templates/admin/papers.html
     }
 }
