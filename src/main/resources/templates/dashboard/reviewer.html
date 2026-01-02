@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/index}">
+<head>
+    <title>Reviewer Dashboard</title>
+</head>
+<body>
+
+    <div layout:fragment="content">
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="glass-card rounded-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-400">Papers to Review</p>
+                        <p class="text-3xl font-bold text-white" th:text="${pendingReviews}">0</p>
+                    </div>
+                    <div class="p-3 bg-orange-500/10 rounded-lg text-orange-500">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-400">Reviews Completed</p>
+                        <p class="text-3xl font-bold text-white" th:text="${completedReviews}">0</p>
+                    </div>
+                    <div class="p-3 bg-green-500/10 rounded-lg text-green-500">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-400">In Progress</p>
+                        <p class="text-3xl font-bold text-white" th:text="${inProgressReviews}">0</p>
+                    </div>
+                    <div class="p-3 bg-blue-500/10 rounded-lg text-blue-500">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="glass-card rounded-xl p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold text-white">Recent Assignments</h2>
+                    <a href="/reviews" class="text-blue-400 hover:text-blue-300 text-sm">View All</a>
+                </div>
+                
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between p-3 bg-gray-800/30 rounded-lg border border-gray-700/50">
+                        <div>
+                            <p class="text-white font-medium">Waiting for assignment</p>
+                            <p class="text-sm text-gray-400">No papers assigned yet</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-xl p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold text-white">Review Guidelines</h2>
+                </div>
+                
+                <div class="space-y-3 text-sm text-gray-300">
+                    <p>• Evaluate papers based on research quality and rigor</p>
+                    <p>• Provide constructive feedback to authors</p>
+                    <p>• Complete reviews within the assigned deadline</p>
+                    <p>• Maintain confidentiality and academic integrity</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

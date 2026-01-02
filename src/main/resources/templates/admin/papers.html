@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/index}">
+<head>
+    <title>Manage Papers</title>
+</head>
+<body>
+
+    <div layout:fragment="content">
+        
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold text-white">Manage Papers</h1>
+            <p class="text-gray-400">Oversee submissions and assign reviewers</p>
+        </div>
+
+        <form th:action="@{/admin/papers}" method="get" class="flex flex-col sm:flex-row gap-4 mb-6">
+            <div class="relative flex-1">
+                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                <input type="text" name="search" th:value="${searchQuery}" placeholder="Search by title or author..." 
+                       class="w-full h-10 pl-10 bg-[#020817] border border-gray-800 rounded-md text-sm text-white focus:ring-1 focus:ring-teal-500 outline-none">
+            </div>
+            <div class="w-full sm:w-48">
+                <select name="status" onchange="this.form.submit()" 
+                        class="w-full h-10 px-3 bg-[#020817] border border-gray-800 rounded-md text-sm text-white focus:ring-1 focus:ring-teal-500 outline-none cursor-pointer">
+                    <option value="all" th:selected="${currentStatus == 'all'}">All Status</option>
+                    <option value="PENDING" th:selected="${currentStatus == 'PENDING'}">Pending</option>
+                    <option value="UNDER_REVIEW" th:selected="${currentStatus == 'UNDER_REVIEW'}">Under Review</option>
+                    <option value="ACCEPTED" th:selected="${currentStatus == 'ACCEPTED'}">Accepted</option>
+                    <option value="REJECTED" th:selected="${currentStatus == 'REJECTED'}">Rejected</option>
+                </select>
+            </div>
+            <button type="submit" class="hidden">Search</button>
+        </form>
+
+        <div class="glass-card rounded-xl overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-gray-800/50 text-gray-400 uppercase font-medium">
+                        <tr>
+                            <th class="px-6 py-4">Paper Title</th>
+                            <th class="px-6 py-4">Author</th>
+                            <th class="px-6 py-4">Status</th>
+                            <th class="px-6 py-4">Date</th>
+                            <th class="px-6 py-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-800">
+                        <tr th:if="${#lists.isEmpty(papers)}">
+                            <td colspan="5" class="px-6 py-8 text-center text-gray-500">
+                                No papers found matching your criteria.
+                            </td>
+                        </tr>
+                        
+                        <tr th:each="paper : ${papers}" class="hover:bg-gray-800/30 transition-colors">
+                            <td class="px-6 py-4">
+                                <div class="font-medium text-white line-clamp-1" th:text="${paper.title}">Title</div>
+                                <div class="text-xs text-gray-500" th:text="${paper.researchArea}">Area</div>
+                            </td>
+                            
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-6 h-6 rounded-full bg-teal-500/20 flex items-center justify-center text-teal-500 text-xs font-bold">
+                                        <span th:text="${#strings.substring(paper.author.firstName, 0, 1)}">A</span>
+                                    </div>
+                                    <span class="text-gray-300" th:text="${paper.author.getFullName()}">Author Name</span>
+                                </div>
+                            </td>
+                            
+                            <td class="px-6 py-4">
+                                <span th:replace="~{fragments/ui :: statusBadge(status=${paper.status})}"></span>
+                            </td>
+                            
+                            <td class="px-6 py-4 text-gray-400" th:text="${#temporals.format(paper.createdAt, 'MMM d, yyyy')}">
+                                Jan 1
+                            </td>
+                            
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    <a th:href="@{/papers/{id}(id=${paper.id})}" class="p-2 text-gray-400 hover:text-white transition-colors" title="View Details">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                    </a>
+                                    
+                                    <a th:href="@{/admin/papers/{id}/assign(id=${paper.id})}" 
+                                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 border border-purple-500/20 transition-colors">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+                                        Assign
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

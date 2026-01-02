@@ -2,8 +2,10 @@ package aletheia.project.Aletheia.controller;
 
 import aletheia.project.Aletheia.dto.PaperRequest;
 import aletheia.project.Aletheia.entity.PaperEntity;
+import aletheia.project.Aletheia.entity.ReviewEntity;
 import aletheia.project.Aletheia.entity.UserEntity;
 import aletheia.project.Aletheia.repository.PaperRepository;
+import aletheia.project.Aletheia.repository.ReviewRepository;
 import aletheia.project.Aletheia.repository.UserRepository;
 import aletheia.project.Aletheia.service.PaperService;
 import jakarta.validation.Valid;
@@ -41,14 +43,16 @@ public class PaperController {
     private final PaperService paperService;
     private final UserRepository userRepository;
     private final PaperRepository paperRepository;
+    private final ReviewRepository reviewRepository;
     
     @Value("${file.upload-dir:uploads/papers}")
     private String uploadDir;
     
-    public PaperController(PaperService paperService, UserRepository userRepository, PaperRepository paperRepository) {
+    public PaperController(PaperService paperService, UserRepository userRepository, PaperRepository paperRepository, ReviewRepository reviewRepository) {
         this.paperService = paperService;
         this.userRepository = userRepository;
         this.paperRepository = paperRepository;
+        this.reviewRepository = reviewRepository;
     }
 
     @GetMapping("/submit") // URL becomes /papers/submit
@@ -91,14 +95,20 @@ public class PaperController {
         PaperEntity paper = paperService.findById(id)
             .orElseThrow(() -> new RuntimeException("Paper not found with id: " + id));
 
+        List<ReviewEntity> reviews = reviewRepository.findByPaperId(id);
+
         // 2. Add to Model
         model.addAttribute("paper", paper);
+        model.addAttribute("reviews", reviews);
         
         // 3. Determine if current user is the author (to show/hide specific buttons)
         if (userDetails != null) {
             UserEntity currentUser = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
             boolean isAuthor = currentUser != null && currentUser.getId().equals(paper.getAuthor().getId());
+            boolean canViewReviews = isAuthor && (paper.getStatus().equals("ACCEPTED") || paper.getStatus().equals("REJECTED"));
+            
             model.addAttribute("isAuthor", isAuthor);
+            model.addAttribute("canViewReviews", canViewReviews);
         }
 
         model.addAttribute("pageTitle", "Paper Details");
