@@ -55,12 +55,13 @@ public class PaperController {
         this.reviewRepository = reviewRepository;
     }
 
-    @GetMapping("/submit") // URL becomes /papers/submit
-    public String showSubmitForm(Model model) {
-        model.addAttribute("paperRequest", new PaperRequest());
-        model.addAttribute("pageTitle", "Submit Paper");
-        return "papers/submit";
-    }
+@GetMapping("/submit")
+public String showSubmitForm(Model model) {
+    model.addAttribute("paperRequest", new PaperRequest());
+    model.addAttribute("editMode", false);
+    model.addAttribute("pageTitle", "Submit Paper");
+    return "papers/submit";
+}
 
     @GetMapping("/my-papers")
     public String myPapers(
@@ -218,6 +219,94 @@ public class PaperController {
             model.addAttribute("paperRequest", paperRequest); 
             return "papers/submit";
         }
+    }
+
+    @GetMapping("/{id}/edit")
+    public String editPaper(
+            @PathVariable("id") Long id,
+            @AuthenticationPrincipal UserDetails userDetails,
+            Model model
+    ) {
+        PaperEntity paper = paperService.findById(id)
+                .orElseThrow(() -> new RuntimeException("Paper not found"));
+
+        UserEntity user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!paper.getAuthor().getId().equals(user.getId())) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        PaperRequest paperRequest = new PaperRequest();
+        paperRequest.setTitle(paper.getTitle());
+        paperRequest.setAbstractText(paper.getAbstractText());
+        paperRequest.setResearchArea(paper.getResearchArea());
+
+        // ✅ Set the file name for display in edit mode
+        paperRequest.setFileName(paper.getFileName()); // assuming your PaperEntity has getFileName()
+
+        model.addAttribute("paperRequest", paperRequest);
+        model.addAttribute("paperId", paper.getId());
+        model.addAttribute("editMode", true);
+        model.addAttribute("pageTitle", "Edit Paper");
+
+        return "papers/submit";
+    }
+
+    @PostMapping("/{id}/edit")
+    public String updatePaper(
+            @PathVariable("id") Long id,
+            @Valid @ModelAttribute PaperRequest paperRequest,
+            BindingResult bindingResult,
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            @RequestParam(value = "customResearchArea", required = false) String customResearchArea,
+            @AuthenticationPrincipal UserDetails userDetails,
+            RedirectAttributes redirectAttributes,
+            Model model
+    ) throws Throwable {
+        PaperEntity paper = paperService.findById(id)
+                .orElseThrow(() -> new RuntimeException("Paper not found"));
+
+        UserEntity currentUser = userRepository
+                .findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!paper.getAuthor().getId().equals(currentUser.getId())) {
+            throw new RuntimeException("Unauthorized access");
+        }
+
+        // Validate new file if uploaded
+        if (file != null && !file.isEmpty()) {
+            if (!"application/pdf".equals(file.getContentType())) {
+                bindingResult.reject("error.file", "Only PDF files allowed");
+            }
+            if (file.getSize() > 10_000_000) {
+                bindingResult.reject("error.file", "File must be ≤ 10MB");
+            }
+        }
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("paper", paper);
+            return "papers/edit";
+        }
+
+        String finalResearchArea = paperRequest.getResearchArea();
+        if ("OTHER".equalsIgnoreCase(finalResearchArea) &&
+            customResearchArea != null &&
+            !customResearchArea.isBlank()) {
+            finalResearchArea = customResearchArea.trim();
+        }
+
+        paperService.updatePaper(
+                paper,
+                paperRequest.getTitle(),
+                paperRequest.getAbstractText(),
+                finalResearchArea,
+                file
+        );
+
+        redirectAttributes.addFlashAttribute("success", "Paper updated successfully!");
+        return "redirect:/papers/" + id;
     }
 
 }

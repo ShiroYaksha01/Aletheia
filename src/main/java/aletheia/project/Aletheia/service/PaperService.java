@@ -108,4 +108,35 @@ public class PaperService {
         }
         // If not all reviews are completed, the status remains "UNDER_REVIEW"
     }
+
+    public PaperEntity updatePaper(
+            PaperEntity paper,
+            String title,
+            String abstractText,
+            String researchArea,
+            MultipartFile file
+    ) throws IOException {
+
+        // Update basic fields
+        paper.setTitle(title);
+        paper.setAbstractText(abstractText);
+        paper.setResearchArea(researchArea);
+
+        // Replace file ONLY if new file uploaded
+        if (file != null && !file.isEmpty()) {
+
+            // Optional: delete old file
+            if (paper.getFilePath() != null) {
+                Path oldFile = Paths.get(uploadDir).resolve(paper.getFilePath());
+                Files.deleteIfExists(oldFile);
+            }
+
+            String newFilename = saveFile(file);
+            paper.setFileName(file.getOriginalFilename());
+            paper.setFilePath(newFilename);
+        }
+
+        return paperRepository.save(paper);
+    }
+
 }
