@@ -140,9 +140,10 @@
                         <p class="text-xs text-gray-500">Select the primary research area</p>
 
                         <!-- Custom Research Area -->
-                        <div id="otherAreaContainer" class="hidden mt-4 p-4 bg-gray-800/30 rounded-lg border border-gray-700 transition-all duration-300">
+                        <div id="otherAreaContainer" class="hidden mt-4 p-4 bg-gray-800/30 rounded-lg border border-gray-700 transition-all duration-300"  >
                             <label for="customAreaInput" class="block text-sm font-semibold text-gray-100 mb-2 flex items-center justify-between">
-                                <span>Specify your area <span class="text-red-400">*</span></span>
+                                <span>Specify your area <span id='customAreaCheck' class="text-red-400">*</span></span>
+                            </label>
                             <input 
                                 type="text"  
                                 id="customAreaInput" 
@@ -161,8 +162,7 @@
                 <div class="glass-card rounded-xl p-8 space-y-4 border border-gray-700/50">
                     <div class="flex items-center gap-2 mb-6">
                         <h2 class="text-xl font-bold text-white">Paper File</h2>
-                        <span class="fileCheck text-red-400" th:if="!${editMode}">*</span>
-
+                        <span id="fileCheck" class="text-red-400" th:if="!${editMode}">*</span>
                     </div>
 
                     <!-- File Upload Area -->
@@ -271,7 +271,7 @@
 
         <script>
             // Get editMode from Thymeleaf
-            const isEditMode = [[${editMode}]] || false;
+            const isEditMode = /*[[${editMode}]]*/ false;
             let errorAlertTimeout, successAlertTimeout;
 
             // Alert Functions
@@ -320,19 +320,26 @@
             }
 
             function validateAreaField() {
-                const researchArea = document.getElementById('researchAreaSelect').value;
-                const areaCheck = document.getElementById('areaCheck');
+                const researchArea = document.getElementById('researchAreaSelect')?.value;  // Add optional chaining
+                if (!researchArea || researchArea === 'OTHER') {
+                    validateCustomAreaField();
+                }
+            }
+
+            function validateCustomAreaField() {
+                const customArea = document.getElementById('customAreaInput').value.trim();
                 const customAreaCheck = document.getElementById('customAreaCheck');
                 
-                if (researchArea === 'OTHER') {
-                    // Don't show check mark for OTHER, wait for custom area
-                    areaCheck.classList.add('hidden');
-                    validateCustomAreaField(); // Check custom area
-                } else if (researchArea && researchArea !== '') {
-                    areaCheck.classList.remove('hidden');
-                    customAreaCheck.classList.add('hidden');
+                if (!customAreaCheck) return; // Exit if element doesn't exist
+                
+                if (customArea.length >= 3) {
+                    customAreaCheck.innerText = '✓';
+                    customAreaCheck.classList.add('text-green-400');
+                    customAreaCheck.classList.remove('text-red-400');
                 } else {
-                    areaCheck.classList.add('hidden');
+                    customAreaCheck.innerText = '*';
+                    customAreaCheck.classList.add('text-red-400');
+                    customAreaCheck.classList.remove('text-green-400');
                 }
             }
 
@@ -432,7 +439,6 @@
                 } else {
                     otherContainer.classList.add('hidden');
                     customInput.value = '';
-                    document.getElementById('customAreaCheck').classList.add('hidden');
                 }
             }
 
@@ -447,6 +453,7 @@
                 const fileCheck = document.getElementById('fileCheck');
 
                 if (!file) return;
+                if (!fileCheck) return;
 
                 // Validate file type
                 if (!file.name.toLowerCase().endsWith('.pdf')) {
