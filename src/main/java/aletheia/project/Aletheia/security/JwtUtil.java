@@ -40,6 +40,7 @@ public class JwtUtil {
             // We use the 'key' field already initialized in the constructor
             Jwts.parser()
                 .verifyWith(this.key) 
+                .clockSkewSeconds(60)
                 .build()
                 .parseSignedClaims(token);
 
