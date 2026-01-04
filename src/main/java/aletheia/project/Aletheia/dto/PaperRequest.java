@@ -43,4 +43,15 @@ public class PaperRequest {
     public void setResearchArea(String researchArea) {
         this.researchArea = researchArea;
     }
+
+    private String fileName; // for edit mode display
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
 }

@@ -8,7 +8,12 @@
 <body>
 
     <div layout:fragment="content">
-        <form th:action="@{/papers/create}" method="post" th:object="${paperRequest}" enctype="multipart/form-data" novalidate class="max-w-3xl space-y-8">
+<form th:action="${editMode} ? @{|/papers/${paperId}/edit|} : @{/papers/create}"
+      method="post"
+      th:object="${paperRequest}"
+      enctype="multipart/form-data"
+      novalidate
+      class="max-w-3xl space-y-8">
             
             <div class="glass-card rounded-xl p-6 space-y-6">
                 <h2 class="text-lg font-semibold text-white">Paper Information</h2>
@@ -45,15 +50,40 @@
 
             <div class="glass-card rounded-xl p-6 space-y-4">
                 <h2 class="text-lg font-semibold text-white">Paper File</h2>
+
                 <div class="border-2 border-dashed border-gray-800 rounded-lg p-8 text-center hover:border-teal-500/50 transition-colors">
-                    <input type="file" name="file" accept=".pdf" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-teal-500/10 file:text-teal-500 hover:file:bg-teal-500/20" required/>
-                    <p class="text-xs text-gray-500 mt-2">PDF only, max 10MB</p>
+
+                    <!-- Show existing file in edit mode -->
+                    <div th:if="${editMode} and ${paperRequest.fileName != null}">
+                        <p class="text-sm text-gray-300">
+                            Current file: 
+                            <a th:href="@{'/papers/files/' + ${paperRequest.fileName}}" target="_blank"
+                            class="text-teal-400 hover:underline"
+                            th:text="${paperRequest.fileName}">PDF</a>
+                        </p>
+                    </div>
+
+                    <!-- File input (optional in edit mode) -->
+                    <input type="file" name="file" accept=".pdf"
+                        th:attr="required=${!editMode}"
+                        class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 
+                                file:rounded-full file:border-0 file:text-sm file:font-semibold 
+                                file:bg-teal-500/10 file:text-teal-500 hover:file:bg-teal-500/20" />
+
+                    <p class="text-xs text-gray-500 mt-2"
+                    th:text="${editMode} ? 'Upload new PDF to replace existing (optional)' : 'PDF only, max 10MB'">
+                    </p>
                 </div>
             </div>
 
+
             <div class="flex justify-end gap-4">
                 <a th:href="@{/dashboard}" class="px-4 py-2 text-gray-400 hover:text-white">Cancel</a>
-                <button type="submit" class="px-6 py-2 bg-gradient-to-r from-teal-600 to-blue-600 text-white rounded-lg font-medium">Submit Paper</button>
+                <button type="submit"
+                        th:text="${editMode} ? 'Update Paper' : 'Submit Paper'"
+                        class="px-6 py-2 bg-gradient-to-r from-teal-600 to-blue-600 text-white rounded-lg font-medium">
+                </button>
+
             </div>
         </form>
 
