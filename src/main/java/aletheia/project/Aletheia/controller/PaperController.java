@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.http.HttpHeaders;
 
@@ -328,6 +329,37 @@ public String showSubmitForm(Model model) {
 
         redirectAttributes.addFlashAttribute("success", "Paper updated successfully!");
         return "redirect:/papers/" + id;
+    }
+
+    @PostMapping("/{id}/delete")
+    public String deletePaper(
+            @PathVariable("id") Long id,
+            @AuthenticationPrincipal UserDetails userDetails,
+            RedirectAttributes redirectAttributes
+    ){ try {
+            PaperEntity paper = paperService.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Paper not found"));
+
+            UserEntity currentUser = userRepository
+                    .findByEmail(userDetails.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            if (!paper.getAuthor().getId().equals(currentUser.getId())) {
+                throw new RuntimeException("Unauthorized access");
+            }
+
+            paperService.deletePaper(id, currentUser.getId());
+            //message of Deleted data and file 
+            System.out.println("Paper deleted successfully: ID " + id);
+            System.out.println("Associated file deleted from storage if it existed.");
+            redirectAttributes.addFlashAttribute("success", "Paper deleted successfully!");
+            return "redirect:/dashboard";
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Failed to delete paper: " + e.getMessage());
+            return "redirect:/papers/" + id;
+        }
     }
 
 }

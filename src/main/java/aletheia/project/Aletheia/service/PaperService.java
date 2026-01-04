@@ -139,4 +139,20 @@ public class PaperService {
         return paperRepository.save(paper);
     }
 
+    public PaperEntity deletePaper(Long paperId, Long userId) throws IOException {
+        PaperEntity paper = paperRepository.findById(paperId)
+            .orElseThrow(() -> new RuntimeException("Paper not found"));
+        
+        if (!paper.getAuthor().getId().equals(userId)) {
+            throw new RuntimeException("Unauthorized to delete this paper");
+        }
+
+        if (paper.getFilePath() != null) {
+            Path filePath = Paths.get(uploadDir).resolve(paper.getFilePath());
+            Files.deleteIfExists(filePath);
+        }
+        paperRepository.delete(paper);
+        return paper;
+    }
+
 }
