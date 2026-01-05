@@ -8,12 +8,19 @@
 <body>
 
     <div layout:fragment="content">
-        <div class="flex items-center justify-between mb-8">
-            <div>
-                <h1 class="text-2xl font-bold text-white">Users</h1>
-                <p class="text-gray-400">Manage system users and roles</p>
-            </div>
-            </div>
+        
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold text-white">Manage Users</h1>
+            <p class="text-gray-400">Manage user accounts and roles</p>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${success}" class="mb-4 p-4 bg-green-500/10 border border-green-500/20 rounded-lg text-green-400">
+            <span th:text="${success}"></span>
+        </div>
+        <div th:if="${error}" class="mb-4 p-4 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400">
+            <span th:text="${error}"></span>
+        </div>
 
         <div class="glass-card rounded-xl overflow-hidden">
             <div class="overflow-x-auto">
@@ -27,46 +34,52 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-800">
+                        <tr th:if="${#lists.isEmpty(users)}">
+                            <td colspan="4" class="px-6 py-8 text-center text-gray-500">
+                                No users found.
+                            </td>
+                        </tr>
+                        
                         <tr th:each="user : ${users}" class="hover:bg-gray-800/30 transition-colors">
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
                                     <div class="w-8 h-8 rounded-full bg-teal-500/20 flex items-center justify-center text-teal-500 font-bold">
-                                        <span th:text="${#strings.substring(user.firstName, 0, 1)}">U</span>
+                                        <span th:text="${#strings.substring(user.firstName, 0, 1)}">P</span>
                                     </div>
                                     <div>
-                                        <div class="font-medium text-white" th:text="${user.getFullName()}">Name</div>
-                                        <div class="text-xs text-gray-500" th:text="${user.email}">email@example.com</div>
+                                        <div class="font-medium text-white" th:text="${user.getFullName()}">User Name</div>
+                                        <div class="text-xs text-gray-500" th:text="${user.email}">user@email.com</div>
                                     </div>
                                 </div>
                             </td>
+                            
                             <td class="px-6 py-4">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border"
-                                      th:classappend="${
-                                        user.role == 'ADMIN' ? 'bg-purple-500/10 text-purple-500 border-purple-500/20' :
-                                        user.role == 'REVIEWER' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
-                                        'bg-teal-500/10 text-teal-500 border-teal-500/20'
-                                      }"
-                                      th:text="${user.role}">
-                                    ROLE
+                                <span th:class="${user.role == 'ADMIN'} ? 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-500/10 text-purple-400 border border-purple-500/20' : 
+                                               (${user.role == 'RESEARCHER'} ? 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-teal-500/10 text-teal-400 border border-teal-500/20' : 
+                                               'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20')"
+                                      th:text="${user.role}">ADMIN</span>
+                            </td>
+                            
+                            <td class="px-6 py-4">
+                                <span th:class="${user.active} ? 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-500/10 text-green-400' : 
+                                               'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-500/10 text-red-400'">
+                                    <span th:class="${user.active} ? 'w-1.5 h-1.5 bg-green-400 rounded-full' : 'w-1.5 h-1.5 bg-red-400 rounded-full'"></span>
+                                    <span th:text="${user.active} ? 'Active' : 'Inactive'">Active</span>
                                 </span>
                             </td>
-                            <td class="px-6 py-4">
-                                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium"
-                                      th:classappend="${user.active ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}">
-                                    <span class="w-1.5 h-1.5 rounded-full" th:classappend="${user.active ? 'bg-green-500' : 'bg-red-500'}"></span>
-                                    <span th:text="${user.active ? 'Active' : 'Inactive'}">Active</span>
-                                </span>
-                            </td>
+                            
                             <td class="px-6 py-4 text-right">
-                                <button class="text-gray-400 hover:text-white transition-colors">Edit</button>
+                                <a th:href="@{/admin/users/{id}/edit(id=${user.id})}" 
+                                   class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border border-blue-500/20 transition-colors">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                    </svg>
+                                    Edit
+                                </a>
                             </td>
                         </tr>
                     </tbody>
                 </table>
-            </div>
-            
-            <div th:if="${#lists.isEmpty(users)}" class="p-8 text-center text-gray-500">
-                No users found.
             </div>
         </div>
     </div>
