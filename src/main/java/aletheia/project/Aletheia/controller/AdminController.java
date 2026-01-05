@@ -127,6 +127,60 @@ public class AdminController {
         return "admin/users";
     }
 
+    // Show edit user form
+    @GetMapping("/users/{id}/edit")
+    public String showEditUserForm(@PathVariable Long id, Model model) {
+        UserEntity user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        model.addAttribute("user", user);
+        model.addAttribute("availableRoles", new String[]{"ADMIN", "RESEARCHER", "REVIEWER"});
+        
+        return "admin/edit-user";
+    }
+
+    // Process edit user form
+    @PostMapping("/users/{id}/edit")
+    public String editUser(@PathVariable Long id,
+                          @RequestParam String firstName,
+                          @RequestParam String lastName,
+                          @RequestParam String email,
+                          @RequestParam String role,
+                          @RequestParam(defaultValue = "true") Boolean active,
+                          RedirectAttributes redirectAttributes) {
+        try {
+            UserEntity user = userRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            
+            // Validate role
+            if (!role.equals("ADMIN") && !role.equals("RESEARCHER") && !role.equals("REVIEWER")) {
+                redirectAttributes.addFlashAttribute("error", "Invalid role selected.");
+                return "redirect:/admin/users/" + id + "/edit";
+            }
+            
+            // Check if email is unique (excluding current user)
+            if (!user.getEmail().equals(email) && userRepository.findByEmail(email).isPresent()) {
+                redirectAttributes.addFlashAttribute("error", "Email already exists.");
+                return "redirect:/admin/users/" + id + "/edit";
+            }
+            
+            user.setFirstName(firstName);
+            user.setLastName(lastName);
+            user.setEmail(email);
+            user.setRole(role);
+            user.setActive(active);
+            
+            userRepository.save(user);
+            
+            redirectAttributes.addFlashAttribute("success", "User updated successfully!");
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Failed to update user.");
+        }
+        
+        return "redirect:/admin/users";
+    }
+
     //  === PAPER MANAGEMENT WITH FILTERS ===
     @GetMapping("/papers")
     public String managePapers(@RequestParam(required = false) String search,
