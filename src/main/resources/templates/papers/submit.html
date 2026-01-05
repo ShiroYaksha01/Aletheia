@@ -8,86 +8,426 @@
 <body>
 
     <div layout:fragment="content">
-<form th:action="${editMode} ? @{|/papers/${paperId}/edit|} : @{/papers/create}"
-      method="post"
-      th:object="${paperRequest}"
-      enctype="multipart/form-data"
-      novalidate
-      class="max-w-3xl space-y-8">
-            
-            <div class="glass-card rounded-xl p-6 space-y-6">
-                <h2 class="text-lg font-semibold text-white">Paper Information</h2>
-                
-                <div class="space-y-2">
-                    <label class="text-sm font-medium text-gray-200">Paper Title *</label>
-                    <input type="text" th:field="*{title}" class="w-full bg-[#020817] border border-gray-800 rounded-md p-2 text-white" placeholder="Enter paper title" required>
+        <!-- Toggleable Alert Messages -->
+        <div id="errorAlert" class="hidden mb-6 bg-red-900/30 border border-red-700 rounded-lg p-4 animate-fade-in">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <svg class="w-5 h-5 text-red-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                    </svg>
+                    <span id="errorMsg" class="text-red-400"></span>
                 </div>
-
-                <div class="space-y-2">
-                    <label class="text-sm font-medium text-gray-200">Abstract *</label>
-                    <textarea th:field="*{abstractText}" rows="4" class="w-full bg-[#020817] border border-gray-800 rounded-md p-2 text-white" placeholder="Brief summary of your research..." required></textarea>
-                </div>
-
-                <div class="space-y-2">
-                    <label class="text-sm font-medium text-gray-200">Research Area *</label>
-                    
-                    <select id="researchAreaSelect" th:field="*{researchArea}" class="w-full bg-[#020817] border border-gray-800 rounded-md p-2 text-white" required onchange="toggleOtherInput()">
-                        <option value="" disabled selected>Select an area</option>
-                        <option value="AI">Artificial Intelligence</option>
-                        <option value="ML">Machine Learning</option>
-                        <option value="CS">Cybersecurity</option>
-                        <option value="DS">Data Science</option>
-                        <option value="SE">Software Engineering</option>
-                        <option value="OTHER">Other</option>
-                    </select>
-
-                    <div id="otherAreaContainer" class="hidden mt-3 transition-all duration-300">
-                        <label class="text-sm font-medium text-gray-200">Please specify area *</label>
-                        <input type="text" id="customAreaInput" name="customResearchArea" class="w-full mt-1 bg-[#020817] border border-gray-800 rounded-md p-2 text-white" placeholder="Enter your specific research area">
-                    </div>
-                </div>
+                <button type="button" onclick="closeAlert('errorAlert')" class="text-red-400 hover:text-red-300">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </button>
             </div>
+        </div>
 
-            <div class="glass-card rounded-xl p-6 space-y-4">
-                <h2 class="text-lg font-semibold text-white">Paper File</h2>
+        <div id="successAlert" class="hidden mb-6 bg-green-900/30 border border-green-700 rounded-lg p-4 animate-fade-in">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <svg class="w-5 h-5 text-green-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                    <span id="successMsg" class="text-green-400"></span>
+                </div>
+                <button type="button" onclick="closeAlert('successAlert')" class="text-green-400 hover:text-green-300">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+        </div>
 
-                <div class="border-2 border-dashed border-gray-800 rounded-lg p-8 text-center hover:border-teal-500/50 transition-colors">
+        <!-- Server-side errors/success -->
+        <div th:if="${error}" class="mb-6 bg-red-900/30 border border-red-700 rounded-lg p-4">
+            <div class="flex items-center gap-2 text-red-400">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+                <span th:text="${error}"></span>
+            </div>
+        </div>
 
-                    <!-- Show existing file in edit mode -->
-                    <div th:if="${editMode} and ${paperRequest.fileName != null}">
-                        <p class="text-sm text-gray-300">
-                            Current file: 
-                            <a th:href="@{'/papers/files/' + ${paperRequest.fileName}}" target="_blank"
-                            class="text-teal-400 hover:underline"
-                            th:text="${paperRequest.fileName}">PDF</a>
-                        </p>
+        <div th:if="${success}" class="mb-6 bg-green-900/30 border border-green-700 rounded-lg p-4">
+            <div class="flex items-center gap-2 text-green-400">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+                <span th:text="${success}"></span>
+            </div>
+        </div>
+
+        <form th:action="${editMode} ? @{|/papers/${paperId}/edit|} : @{/papers/create}"
+              method="post"
+              th:object="${paperRequest}"
+              enctype="multipart/form-data"
+              novalidate
+              class="space-y-8"
+              id="paperForm"
+              onsubmit="return validateForm(event)">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+                <div class="glass-card rounded-xl p-8 space-y-6 border border-gray-700/50">
+                    <div class="flex items-center gap-2 mb-6">
+                        <h2 class="text-xl font-bold text-white">Paper Information</h2>
                     </div>
 
-                    <!-- File input (optional in edit mode) -->
-                    <input type="file" name="file" accept=".pdf"
-                        th:attr="required=${!editMode}"
-                        class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 
-                                file:rounded-full file:border-0 file:text-sm file:font-semibold 
-                                file:bg-teal-500/10 file:text-teal-500 hover:file:bg-teal-500/20" />
+                    <!-- Title Field -->
+                    <div class="space-y-2">
+                        <label for="title" class="block text-sm font-semibold text-gray-100 flex items-center justify-between">
+                            <span>Paper Title <span id="titleCheck" class="ml-1 text-red-400">*</span></span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="title"
+                            th:field="*{title}" 
+                            class="w-full bg-[#020817] border border-gray-700 rounded-lg p-3 text-white placeholder-gray-500
+                                    focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none
+                                    transition-colors duration-200"
+                            placeholder="e.g., Machine Learning Applications in Healthcare"
+                            minlength="5"
+                            maxlength="255"
+                            oninput="validateTitleField()">
+                        <p class="text-xs text-gray-500">5-255 characters</p>
+                    </div>
 
-                    <p class="text-xs text-gray-500 mt-2"
-                    th:text="${editMode} ? 'Upload new PDF to replace existing (optional)' : 'PDF only, max 10MB'">
+                    <!-- Abstract Field -->
+                    <div class="space-y-2">
+                        <label for="abstract" class="block text-sm font-semibold text-gray-100 flex items-center justify-between">
+                            <span>Abstract <span id="abstractCheck" class="ml-1 text-red-400">*</span></span>
+                        </label>
+                        <textarea 
+                            id="abstract"
+                            th:field="*{abstractText}" 
+                            rows="6" 
+                            class="w-full bg-[#020817] border border-gray-700 rounded-lg p-3 text-white placeholder-gray-500
+                                    focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none
+                                    transition-colors duration-200 resize-none"
+                            placeholder="Brief summary of your research..."
+                            minlength="50"
+                            maxlength="5000"
+                            oninput="updateCharCount()"></textarea>
+                        <div class="flex justify-between items-center">
+                            <p class="text-xs text-gray-500">50-5000 characters</p>
+                            <span class="text-xs text-gray-500" id="charCount">0/5000</span>
+                        </div>
+                    </div>
+
+                    <!-- Research Area Field -->
+                    <div class="space-y-2">
+                        <label for="researchAreaSelect" class="block text-sm font-semibold text-gray-100 flex items-center justify-between">
+                            <span>Research Area</span>
+                        </label>
+                        <select 
+                            id="researchAreaSelect" 
+                            th:field="*{researchArea}" 
+                            class="w-full bg-[#020817] border border-gray-700 rounded-lg p-3 text-white
+                                    focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none
+                                    transition-colors duration-200 cursor-pointer"
+                            onchange="toggleOtherInput(); validateAreaField()">
+                            <option value="" disabled selected>-- Select a research area --</option>
+                            <option value="AI">Artificial Intelligence</option>
+                            <option value="ML">Machine Learning</option>
+                            <option value="CS">Cybersecurity</option>
+                            <option value="DS">Data Science</option>
+                            <option value="SE">Software Engineering</option>
+                            <option value="OTHER">Other</option>
+                        </select>
+                        <p class="text-xs text-gray-500">Select the primary research area</p>
+
+                        <!-- Custom Research Area -->
+                        <div id="otherAreaContainer" class="hidden mt-4 p-4 bg-gray-800/30 rounded-lg border border-gray-700 transition-all duration-300"  >
+                            <label for="customAreaInput" class="block text-sm font-semibold text-gray-100 mb-2 flex items-center justify-between">
+                                <span>Specify your area <span id='customAreaCheck' class="text-red-400">*</span></span>
+                            </label>
+                            <input 
+                                type="text"  
+                                id="customAreaInput" 
+                                name="customResearchArea" 
+                                class="w-full bg-[#020817] border border-gray-700 rounded-lg p-3 text-white placeholder-gray-500
+                                        focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none
+                                        transition-colors duration-200"
+                                placeholder="Enter your specific research area..."
+                                maxlength="255"
+                                oninput="validateCustomAreaField()">
+                            <p class="text-xs text-gray-500 mt-2">Be specific about your focus</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-xl p-8 space-y-4 border border-gray-700/50">
+                    <div class="flex items-center gap-2 mb-6">
+                        <h2 class="text-xl font-bold text-white">Paper File</h2>
+                        <span id="fileCheck" class="text-red-400" th:if="!${editMode}">*</span>
+                    </div>
+
+                    <!-- File Upload Area -->
+                    <div class="border-2 border-dashed border-gray-700 rounded-lg p-8 text-center hover:border-teal-500/50 hover:bg-teal-500/5 transition-all duration-300 min-h-96 flex flex-col items-center justify-center"
+                         id="dropZone"
+                         ondrop="handleDrop(event)"
+                         ondragover="handleDragOver(event)"
+                         ondragleave="handleDragLeave(event)">
+
+                        <!-- Show existing file in edit mode -->
+                        <div th:if="${editMode} and ${paperRequest.fileName != null}" class="w-full mb-6">
+                            <div class="flex items-center justify-center gap-2 text-green-400 mb-4">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M8.707 15.707a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L7 13.586V8a1 1 0 012 0v5.586l3.293-3.293a1 1 0 011.414 1.414l-4 4z" clip-rule="evenodd" />
+                                </svg>
+                                <span class="font-semibold">Current File</span>
+                            </div>
+                            <p class="text-sm text-gray-300 mb-2">
+                                <a th:href="@{'/papers/files/' + ${paperRequest.fileName}}" 
+                                   target="_blank"
+                                   class="text-teal-400 hover:text-teal-300 underline font-semibold"
+                                   th:text="${paperRequest.fileName}">PDF</a>
+                            </p>
+                        </div>
+
+                        <!-- File Input -->
+                        <div class="space-y-4 w-full">
+                            <svg class="w-12 h-12 mx-auto text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3v-6" />
+                            </svg>
+                            
+                            <div>
+                                <label for="fileInput" class="cursor-pointer inline-block">
+                                    <span class="text-teal-400 hover:text-teal-300 font-semibold underline">Click to upload</span>
+                                </label>
+                                <span class="text-gray-400"> or drag & drop</span>
+                                <input 
+                                    type="file" 
+                                    id="fileInput"
+                                    name="file" 
+                                    accept=".pdf"
+                                    class="hidden"
+                                    onchange="handleFileSelect(this)">
+                            </div>
+
+                            <p class="text-xs text-gray-500">PDF only, max 10MB</p>
+                        </div>
+
+                        <!-- File Status -->
+                        <div id="fileStatus" class="mt-4 w-full hidden">
+                            <div id="fileSuccess" class="hidden p-3 bg-green-900/30 border border-green-700 rounded-lg">
+                                <div class="flex items-center gap-2 text-green-400">
+                                    <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span id="fileName" class="text-sm font-semibold"></span>
+                                </div>
+                            </div>
+                            <div id="fileError" class="hidden p-3 bg-red-900/30 border border-red-700 rounded-lg">
+                                <div class="flex items-center gap-2 text-red-400">
+                                    <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span id="fileErrorMsg" class="text-sm font-semibold"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Edit mode notice -->
+                    <p class="text-xs text-gray-500 text-center" th:if="${editMode}">
+                        Upload a new file to replace the current one (optional)
                     </p>
                 </div>
             </div>
 
-
-            <div class="flex justify-end gap-4">
-                <a th:href="@{/dashboard}" class="px-4 py-2 text-gray-400 hover:text-white">Cancel</a>
-                <button type="submit"
-                        th:text="${editMode} ? 'Update Paper' : 'Submit Paper'"
-                        class="px-6 py-2 bg-gradient-to-r from-teal-600 to-blue-600 text-white rounded-lg font-medium">
+            <!-- Form Actions -->
+            <div class="flex justify-between items-center gap-4">
+                <a th:href="@{/dashboard}" 
+                   class="px-6 py-2 text-gray-400 hover:text-white border border-gray-700 rounded-lg transition-colors duration-200">
+                    Cancel
+                </a>
+                <button 
+                    type="submit"
+                    th:text="${editMode} ? 'Update Paper' : 'Submit Paper'"
+                    class="px-8 py-2 bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-500 hover:to-blue-500 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200">
                 </button>
-
             </div>
         </form>
 
+        <style>
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(-10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            .animate-fade-in {
+                animation: fadeIn 0.3s ease-out;
+            }
+        </style>
+
         <script>
+            // Get editMode from Thymeleaf
+            const isEditMode = /*[[${editMode}]]*/ false;
+            let errorAlertTimeout, successAlertTimeout;
+
+            // Alert Functions
+            function showAlert(message, type) {
+                if (type === 'error') {
+                    // Clear any existing timeout
+                    if (errorAlertTimeout) clearTimeout(errorAlertTimeout);
+                    
+                    document.getElementById('errorMsg').textContent = message;
+                    document.getElementById('errorAlert').classList.remove('hidden');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    
+                    // Auto-close after 3 seconds
+                    errorAlertTimeout = setTimeout(() => closeAlert('errorAlert'), 3000);
+                } else if (type === 'success') {
+                    // Clear any existing timeout
+                    if (successAlertTimeout) clearTimeout(successAlertTimeout);
+                    
+                    document.getElementById('successMsg').textContent = message;
+                    document.getElementById('successAlert').classList.remove('hidden');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    
+                    // Auto-close after 3 seconds
+                    successAlertTimeout = setTimeout(() => closeAlert('successAlert'), 3000);
+                }
+            }
+
+            function closeAlert(alertId) {
+                document.getElementById(alertId).classList.add('hidden');
+            }
+
+            // Validation functions with visual indicators
+            function validateTitleField() {
+                const title = document.getElementById('title').value.trim();
+                const titleCheck = document.getElementById('titleCheck');
+                
+                if (title.length >= 5 && title.length <= 255) {
+                    titleCheck.innerText = '✓';
+                    titleCheck.classList.add('text-green-400');
+                    titleCheck.classList.remove('text-red-400');
+                } else {
+                    titleCheck.innerText = '*';
+                    titleCheck.classList.add('text-red-400');
+                    titleCheck.classList.remove('text-green-400');
+                }
+            }
+
+            function validateAreaField() {
+                const researchArea = document.getElementById('researchAreaSelect')?.value;  // Add optional chaining
+                if (!researchArea || researchArea === 'OTHER') {
+                    validateCustomAreaField();
+                }
+            }
+
+            function validateCustomAreaField() {
+                const customArea = document.getElementById('customAreaInput').value.trim();
+                const customAreaCheck = document.getElementById('customAreaCheck');
+                
+                if (!customAreaCheck) return; // Exit if element doesn't exist
+                
+                if (customArea.length >= 3) {
+                    customAreaCheck.innerText = '✓';
+                    customAreaCheck.classList.add('text-green-400');
+                    customAreaCheck.classList.remove('text-red-400');
+                } else {
+                    customAreaCheck.innerText = '*';
+                    customAreaCheck.classList.add('text-red-400');
+                    customAreaCheck.classList.remove('text-green-400');
+                }
+            }
+
+            // Character counter
+            function updateCharCount() {
+                const abstract = document.getElementById('abstract');
+                const charCount = document.getElementById('charCount');
+                const abstractCheck = document.getElementById('abstractCheck');
+                const length = abstract.value.length;
+                charCount.textContent = length + '/5000';
+                
+                // Change color based on length
+                if (length < 50) {
+                    charCount.classList.add('text-red-400');
+                    charCount.classList.remove('text-green-400', 'text-gray-500');
+                    abstractCheck.innerHTML = '*';
+                    abstractCheck.classList.add('text-red-400');
+                } else if (length >= 50 && length <= 5000) {
+                    charCount.classList.add('text-green-400');
+                    charCount.classList.remove('text-red-400', 'text-gray-500');
+                    abstractCheck.innerHTML = '✓';
+                    abstractCheck.classList.remove('text-red-400');
+                    abstractCheck.classList.add('text-green-400');
+                } else {
+                    charCount.classList.add('text-red-400');
+                    charCount.classList.remove('text-green-400', 'text-gray-500');
+                    abstractCheck.innerHTML = '*';
+                    abstractCheck.classList.add('text-red-400');
+                }
+            }
+
+            // Form Validation
+            function validateForm(event) {
+                const title = document.getElementById('title').value.trim();
+                const abstract = document.getElementById('abstract').value.trim();
+                const researchArea = document.getElementById('researchAreaSelect').value;
+                const customArea = document.getElementById('customAreaInput').value.trim();
+                const fileInput = document.getElementById('fileInput');
+
+                // Validate Title
+                if (!title) {
+                    event.preventDefault();
+                    showAlert('Paper title is required!', 'error');
+                    document.getElementById('title').focus();
+                    return false;
+                }
+                if (title.length < 5) {
+                    event.preventDefault();
+                    showAlert('Paper title must be at least 5 characters long!', 'error');
+                    document.getElementById('title').focus();
+                    return false;
+                }
+
+                // Validate Abstract
+                if (!abstract) {
+                    event.preventDefault();
+                    showAlert('Abstract is required!', 'error');
+                    document.getElementById('abstract').focus();
+                    return false;
+                }
+
+                if (abstract.length < 50) {
+                    event.preventDefault();
+                    showAlert('Abstract must be at least 50 characters long!', 'error');
+                    document.getElementById('abstract').focus();
+                    return false;
+                }
+
+                // Validate Custom Research Area
+                if (researchArea === 'OTHER' && !customArea) {
+                    event.preventDefault();
+                    showAlert('Please specify your research area!', 'error');
+                    document.getElementById('customAreaInput').focus();
+                    return false;
+                }
+
+                // Validate File
+                if (!isEditMode && (!fileInput.files || fileInput.files.length === 0)) {
+                    event.preventDefault();
+                    showAlert('Please upload a PDF file!', 'error');
+                    document.getElementById('fileInput').click();
+                    return false;
+                }
+
+                return true;
+            }
+
+            // Toggle custom research area input
             function toggleOtherInput() {
                 const select = document.getElementById('researchAreaSelect');
                 const otherContainer = document.getElementById('otherAreaContainer');
@@ -95,13 +435,91 @@
 
                 if (select.value === 'OTHER') {
                     otherContainer.classList.remove('hidden');
-                    customInput.required = true; // Make it required if "Other" is selected
+                    customInput.focus();
                 } else {
                     otherContainer.classList.add('hidden');
-                    customInput.required = false; // Not required otherwise
-                    customInput.value = ''; // Clear input if hidden
+                    customInput.value = '';
                 }
             }
+
+            // File handling
+            function handleFileSelect(input) {
+                const file = input.files[0];
+                const fileStatus = document.getElementById('fileStatus');
+                const fileSuccess = document.getElementById('fileSuccess');
+                const fileError = document.getElementById('fileError');
+                const fileName = document.getElementById('fileName');
+                const fileErrorMsg = document.getElementById('fileErrorMsg');
+                const fileCheck = document.getElementById('fileCheck');
+
+                if (!file) return;
+                if (!fileCheck) return;
+
+                // Validate file type
+                if (!file.name.toLowerCase().endsWith('.pdf')) {
+                    showAlert('Invalid file type. Please upload a PDF file.', 'error');
+                    fileError.classList.remove('hidden');
+                    fileSuccess.classList.add('hidden');
+                    fileErrorMsg.textContent = 'Invalid file type - PDF only';
+                    fileStatus.classList.remove('hidden');
+                    fileCheck.classList.add('hidden');
+                    input.value = '';
+                    return;
+                }
+
+                // Validate file size (10MB)
+                if (file.size > 10 * 1024 * 1024) {
+                    showAlert('File size exceeds 10MB limit.', 'error');
+                    fileError.classList.remove('hidden');
+                    fileSuccess.classList.add('hidden');
+                    fileErrorMsg.textContent = 'File too large (max 10MB)';
+                    fileStatus.classList.remove('hidden');
+                    fileCheck.classList.add('hidden');
+                    input.value = '';
+                    return;
+                }
+
+                // File is valid
+                showAlert('File uploaded successfully!', 'success');
+                fileSuccess.classList.remove('hidden');
+                fileError.classList.add('hidden');
+                fileName.textContent = file.name + ' (' + (file.size / 1024 / 1024).toFixed(2) + ' MB)';
+                fileStatus.classList.remove('hidden');
+                fileCheck.classList.add('hidden');
+            }
+
+            // Drag and drop
+            function handleDragOver(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                document.getElementById('dropZone').classList.add('border-teal-500', 'bg-teal-500/5');
+            }
+
+            function handleDragLeave(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                document.getElementById('dropZone').classList.remove('border-teal-500', 'bg-teal-500/5');
+            }
+
+            function handleDrop(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                document.getElementById('dropZone').classList.remove('border-teal-500', 'bg-teal-500/5');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    document.getElementById('fileInput').files = files;
+                    handleFileSelect(document.getElementById('fileInput'));
+                }
+            }
+
+            // Initialize on page load
+            document.addEventListener('DOMContentLoaded', function() {
+                updateCharCount();
+                toggleOtherInput();
+                validateTitleField();
+                validateAreaField();
+            });
         </script>
     </div>
 

@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.http.HttpHeaders;
 
@@ -120,7 +121,7 @@ public String showSubmitForm(Model model) {
 
     @GetMapping("/files/{filename:.+}")
     @ResponseBody
-    public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
+    public ResponseEntity<Resource> serveFile(@PathVariable("filename") String filename) {
         try {
             // Get the absolute path to the uploads directory
             Path uploadPath = Paths.get(uploadDir).toAbsolutePath();
@@ -162,11 +163,14 @@ public String showSubmitForm(Model model) {
         RedirectAttributes redirectAttributes,
         Model model
     ) {
+        System.out.println("Create paper debug");
         // 1. Check if user is logged in
         if (userDetails == null) {
+            System.out.println("Error: User not logged in");
             redirectAttributes.addFlashAttribute("error", "You must be logged in to create a paper.");
             return "redirect:/login";
         }
+        System.out.println("User: " + userDetails.getUsername());
 
         // 2. Validate File
         if (file != null && !file.isEmpty()) {
@@ -182,13 +186,28 @@ public String showSubmitForm(Model model) {
              bindingResult.reject("error.file", "Paper file is required.");
         }
 
+        // Print form data
+        System.out.println("Title: " + paperRequest.getTitle());
+        System.out.println("Abstract: " + (paperRequest.getAbstractText() != null ? 
+            paperRequest.getAbstractText().substring(0, Math.min(50, paperRequest.getAbstractText().length())) + "..." : "null"));
+        System.out.println("Research Area: " + paperRequest.getResearchArea());
+        System.out.println("Custom Research Area: " + customResearchArea);
+
+
         if (bindingResult.hasErrors()) {
+            System.out.println("VALIDATION ERRORS:");
+            bindingResult.getAllErrors().forEach(error -> 
+                System.out.println("  - " + error.getDefaultMessage())
+            );
+            model.addAttribute("editMode", false);
+            model.addAttribute("paperRequest", paperRequest);
             return "papers/submit";
         }
 
         try {
             // 3. Fetch User
             String email = userDetails.getUsername();
+            System.out.println("Fetching user with email: " + email);
             UserEntity author = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found: " + email));
 
@@ -217,6 +236,7 @@ public String showSubmitForm(Model model) {
             model.addAttribute("error", "Failed to upload paper: " + e.getMessage());
             // Important: Add the paperRequest back so the form doesn't go blank on error
             model.addAttribute("paperRequest", paperRequest); 
+            model.addAttribute("editMode", false);
             return "papers/submit";
         }
     }
@@ -242,7 +262,7 @@ public String showSubmitForm(Model model) {
         paperRequest.setAbstractText(paper.getAbstractText());
         paperRequest.setResearchArea(paper.getResearchArea());
 
-        // ✅ Set the file name for display in edit mode
+        // Set the file name for display in edit mode
         paperRequest.setFileName(paper.getFileName()); // assuming your PaperEntity has getFileName()
 
         model.addAttribute("paperRequest", paperRequest);
@@ -287,6 +307,8 @@ public String showSubmitForm(Model model) {
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("paper", paper);
+            model.addAttribute("paperId", id);
+            model.addAttribute("editMode", true);
             return "papers/edit";
         }
 
@@ -307,6 +329,37 @@ public String showSubmitForm(Model model) {
 
         redirectAttributes.addFlashAttribute("success", "Paper updated successfully!");
         return "redirect:/papers/" + id;
+    }
+
+    @PostMapping("/{id}/delete")
+    public String deletePaper(
+            @PathVariable("id") Long id,
+            @AuthenticationPrincipal UserDetails userDetails,
+            RedirectAttributes redirectAttributes
+    ){ try {
+            PaperEntity paper = paperService.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Paper not found"));
+
+            UserEntity currentUser = userRepository
+                    .findByEmail(userDetails.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            if (!paper.getAuthor().getId().equals(currentUser.getId())) {
+                throw new RuntimeException("Unauthorized access");
+            }
+
+            paperService.deletePaper(id, currentUser.getId());
+            //message of Deleted data and file 
+            System.out.println("Paper deleted successfully: ID " + id);
+            System.out.println("Associated file deleted from storage if it existed.");
+            redirectAttributes.addFlashAttribute("success", "Paper deleted successfully!");
+            return "redirect:/dashboard";
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Failed to delete paper: " + e.getMessage());
+            return "redirect:/papers/" + id;
+        }
     }
 
 }

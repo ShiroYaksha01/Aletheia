@@ -31,6 +31,11 @@
                 </span>
             </div>
 
+            <div class="text-sm text-gray-400 line-clamp-2">
+                <span th:text="${#strings.abbreviate(paper.abstractText, 120) + ' '}">Brief summary of the research...</span>
+                <a th:href="@{/papers/{id}(id=${paper.id})}" class="text-teal-400 hover:underline">see more</a>
+            </div>
+
             <div class="flex items-center gap-2 pt-2 border-t border-gray-800">
                 <a th:href="@{/papers/{id}(id=${paper.id})}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-gray-800 h-9 px-3 text-gray-300">
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
@@ -42,24 +47,13 @@
                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                         Update
                     </a>
-                    <form th:action="@{/papers/{id}/withdraw(id=${paper.id})}" method="post" class="inline" onsubmit="return confirm('Are you sure you want to withdraw this paper?');">
+                    <form th:action="@{/papers/{id}/delete(id=${paper.id})}" method="post" class="inline" onsubmit="return confirm('Are you sure you want to delete this paper?');">
                          <button type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-red-900/20 text-red-500 hover:text-red-400 h-9 px-3">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            Withdraw
+                            Delete
                         </button>
                     </form>
                 </th:block>
-
-                <th:block th:if="${variant == 'reviewer'}">
-                    <a th:href="@{/files/{filename}(filename=${paper.fileName})}" target="_blank" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-gray-800 h-9 px-3 text-gray-300">
-                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        Download
-                    </a>
-                    <a th:href="@{/reviews/submit/{id}(id=${paper.id})}" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors bg-teal-600 hover:bg-teal-700 h-9 px-3 text-white">
-                        Start Review
-                    </a>
-                </th:block>
-
             </div>
         </div>
     </div>
