@@ -32,8 +32,8 @@ public class ReviewController {
     }
     @GetMapping("/my-reviews")
     public String myReviews(@AuthenticationPrincipal UserDetails userDetails,
-                            @RequestParam(required = false) String search,
-                            @RequestParam(required = false, defaultValue = "all") String status,
+                            @RequestParam(value = "search", required = false) String search,
+                            @RequestParam(value = "status", required = false, defaultValue = "all") String status,
                             Model model) {
         
         // 1. Get Current Reviewer

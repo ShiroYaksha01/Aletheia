@@ -67,8 +67,8 @@ public String showSubmitForm(Model model) {
     @GetMapping("/my-papers")
     public String myPapers(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestParam(required = false) String search,
-            @RequestParam(required = false, defaultValue = "all") String status,
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "status", required = false, defaultValue = "all") String status,
             Model model) {
         
         // 1. Get current user
