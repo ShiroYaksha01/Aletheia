@@ -210,4 +210,32 @@ public class AdminController {
 
         return "admin/papers"; // Maps to templates/admin/papers.html
     }
+
+    // 3. Delete a Paper
+    @PostMapping("/papers/{id}/delete")
+    public String deletePaper(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            if (!paperRepository.existsById(id)) {
+                redirectAttributes.addFlashAttribute("error", "Paper not found!");
+                return "redirect:/admin/papers";
+            }
+
+            // Before deleting the paper, we must delete associated reviews
+            // to avoid foreign key constraint violations.
+            List<ReviewEntity> reviews = reviewRepository.findByPaperIdWithReviewer(id);
+            if (reviews != null && !reviews.isEmpty()) {
+                reviewRepository.deleteAll(reviews);
+            }
+
+            paperRepository.deleteById(id);
+            redirectAttributes.addFlashAttribute("success", "Paper and its associated reviews have been deleted successfully.");
+
+        } catch (Exception e) {
+            // Log the exception for debugging purposes
+            // logger.error("Error deleting paper with id {}: {}", id, e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "An error occurred while trying to delete the paper.");
+        }
+
+        return "redirect:/admin/papers";
+    }
 }
