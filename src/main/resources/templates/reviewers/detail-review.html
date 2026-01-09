@@ -94,13 +94,13 @@
                     </a>
 
                     <!-- Edit Review if review exists -->
-                    <a th:if="${review != null}" th:href="@{/reviews/edit/{id}(id=${review.id})}"
+                    <a th:if="${review != null}" th:href="@{/reviews/edit/{id}(id=${review.id}, from='view')}"
                        class="px-6 py-2 rounded-lg bg-gradient-to-r from-teal-600 to-blue-600 text-white font-medium hover:opacity-90 transition-opacity shadow-lg shadow-teal-500/20">
                         Edit Review
                     </a>
 
                     <!-- Back -->
-                    <a th:href="@{/reviewer/assigned-papers}"
+                    <a th:href="@{/reviews/my-reviews}"
                        class="px-4 py-2 text-gray-400 hover:text-white transition-colors">
                         Back
                     </a>
