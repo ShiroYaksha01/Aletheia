@@ -131,4 +131,75 @@ public class ReviewController {
             return "redirect:/reviewers/submit/" + id;
         }
     }
+
+    // === GET: Edit Completed Review Form ===
+    @GetMapping("/edit/{id}")
+    public String editReviewForm(@PathVariable Long id,
+                                @AuthenticationPrincipal UserDetails userDetails,
+                                Model model,
+                                RedirectAttributes redirectAttributes) {
+        try {
+            // 1. Fetch the review
+            ReviewEntity review = reviewRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Review not found"));
+
+            // 2. Security check
+            if (!review.getReviewer().getEmail().equals(userDetails.getUsername())) {
+                redirectAttributes.addFlashAttribute("error", "You are not authorized to edit this review.");
+                return "redirect:/reviewer/assigned-papers";
+            }
+
+            // 3. Only allow editing if the review is COMPLETED
+            if (!"COMPLETED".equalsIgnoreCase(review.getStatus())) {
+                redirectAttributes.addFlashAttribute("error", "Only completed reviews can be edited.");
+                return "redirect:/reviewer/assigned-papers";
+            }
+
+            model.addAttribute("review", review);
+            model.addAttribute("paper", review.getPaper());
+
+            return "reviewers/submit"; // reuse the same submit.html form for editing
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error loading review: " + e.getMessage());
+            return "redirect:/reviewer/assigned-papers";
+        }
+    }
+
+    // === POST: Save Edited Review ===
+    @PostMapping("/edit/{id}")
+    public String saveEditedReview(@PathVariable Long id,
+                                @RequestParam("score") BigDecimal score,
+                                @RequestParam("feedback") String feedback,
+                                @AuthenticationPrincipal UserDetails userDetails,
+                                RedirectAttributes redirectAttributes) {
+        try {
+            ReviewEntity review = reviewRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Review not found"));
+
+            // Security check
+            if (!review.getReviewer().getEmail().equals(userDetails.getUsername())) {
+                throw new RuntimeException("Unauthorized");
+            }
+
+            // Only allow editing completed reviews
+            if (!"COMPLETED".equalsIgnoreCase(review.getStatus())) {
+                throw new RuntimeException("Only completed reviews can be edited.");
+            }
+
+            // Update score and feedback
+            review.setScore(score);
+            review.setFeedback(feedback);
+
+            reviewRepository.save(review);
+
+            redirectAttributes.addFlashAttribute("success", "Review updated successfully!");
+            return "redirect:/reviews/my-reviews";
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to update review: " + e.getMessage());
+            return "redirect:/reviews/edit/" + id;
+        }
+    }
+
 }
