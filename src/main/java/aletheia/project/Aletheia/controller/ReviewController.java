@@ -124,11 +124,11 @@ public class ReviewController {
 
 
             redirectAttributes.addFlashAttribute("success", "Review submitted successfully!");
-            return "redirect:/reviewer/assigned-papers";
+            return "redirect:/reviews/my-reviews";
 
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Failed to submit review.");
-            return "redirect:/reviewers/submit/" + id;
+            return "redirect:/reviews/submit/" + id;
         }
     }
 
@@ -194,11 +194,43 @@ public class ReviewController {
             reviewRepository.save(review);
 
             redirectAttributes.addFlashAttribute("success", "Review updated successfully!");
-            return "redirect:/reviews/my-reviews";
+            return "redirect:/reviews/detail-review";
 
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Failed to update review: " + e.getMessage());
             return "redirect:/reviews/edit/" + id;
+        }
+    }
+
+    // === GET: View Completed Review ===
+    @GetMapping("/view/{id}")
+    public String viewReview(@PathVariable Long id,
+                            @AuthenticationPrincipal UserDetails userDetails,
+                            Model model,
+                            RedirectAttributes redirectAttributes) {
+        try {
+            ReviewEntity review = reviewRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Review not found"));
+
+            // Security: Ensure the current user is the reviewer
+            if (!review.getReviewer().getEmail().equals(userDetails.getUsername())) {
+                redirectAttributes.addFlashAttribute("error", "You are not authorized to view this review.");
+                return "redirect:/reviewer/assigned-papers";
+            }
+
+            // Only allow viewing COMPLETED reviews
+            if (!"COMPLETED".equalsIgnoreCase(review.getStatus())) {
+                redirectAttributes.addFlashAttribute("error", "You can only view completed reviews.");
+                return "redirect:/reviewer/assigned-papers";
+            }
+
+            model.addAttribute("review", review);
+            model.addAttribute("paper", review.getPaper());
+
+            return "reviewers/detail-review";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error loading review: " + e.getMessage());
+            return "redirect:/reviewer/assigned-papers";
         }
     }
 

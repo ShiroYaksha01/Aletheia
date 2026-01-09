@@ -99,13 +99,19 @@
                                 Download PDF
                             </a>
 
-                            <a th:href="@{/reviews/submit/{id}(id=${review.id})}" 
-                            class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-all h-9 px-4 text-white shadow-lg ml-auto"
-                            th:classappend="${review.status == 'COMPLETED' ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gradient-to-r from-teal-600 to-blue-600 hover:opacity-90 shadow-teal-500/20'}">
-                                <span th:text="${review.status == 'COMPLETED' ? 'View Review' : 'Start Review'}">Start Review</span>
-                                <svg th:unless="${review.status == 'COMPLETED'}" class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                                </svg>
+                            <a th:if="${review.status == 'COMPLETED'}"
+                            th:href="@{/reviews/view/{id}(id=${review.id})}"
+                            class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-all h-9 px-4 text-white shadow-lg ml-auto bg-gray-700 hover:bg-gray-600">
+                                View Review
+                            </a>
+
+                            <a th:unless="${review.status == 'COMPLETED'}"
+                            th:href="@{/reviews/submit/{id}(id=${review.id})}"
+                            class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-all h-9 px-4 text-white shadow-lg ml-auto bg-gradient-to-r from-teal-600 to-blue-600 hover:opacity-90 shadow-teal-500/20">
+                                Start Review
+                            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                            </svg>
                             </a>
 
                             <!-- Edit Review button, visible only if review is COMPLETED -->

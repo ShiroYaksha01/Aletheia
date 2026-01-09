@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/index}">
+<head>
+    <title>Review Details</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <!-- Back Button -->
+    <a th:href="@{/reviewer/assigned-papers}" class="inline-flex items-center text-sm text-gray-400 hover:text-white mb-6">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+        Back to Assigned Papers
+    </a>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+        <!-- Paper Details -->
+        <div class="space-y-6">
+            <div class="glass-card rounded-xl p-6 relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4 opacity-10">
+                    <svg class="w-32 h-32 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+
+                <h2 class="text-xl font-bold text-white mb-4">Paper Details</h2>
+
+                <div class="space-y-4 relative z-10">
+                    <div>
+                        <p class="text-sm text-gray-500">Title</p>
+                        <p class="text-white font-medium text-lg leading-snug" th:text="${paper.title}">Paper Title</p>
+                    </div>
+
+                    <div>
+                        <p class="text-sm text-gray-500">Research Area</p>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-500/15 text-blue-500"
+                              th:text="${paper.researchArea}">Area</span>
+                    </div>
+
+                    <div>
+                        <p class="text-sm text-gray-500 mb-2">Abstract</p>
+                        <div class="bg-[#020817]/50 rounded-lg p-4 text-gray-300 text-sm leading-relaxed border border-gray-800 max-h-60 overflow-y-auto"
+                             th:text="${paper.abstractText}">
+                            Abstract content...
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-gray-800">
+                        <a th:href="@{/files/{name}(name=${paper.fileName})}" target="_blank"
+                           class="flex items-center justify-center w-full py-2.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-white transition-colors border border-gray-700">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
+                            Download Full PDF
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Review Details -->
+        <div class="space-y-6">
+            <div class="glass-card rounded-xl p-6">
+                <h2 class="text-xl font-bold text-white mb-6">Review Details</h2>
+
+                <!-- Read-only Score -->
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-500">Score</label>
+                    <p class="text-white font-bold text-lg mb-5"
+                       th:text="${review != null} ? ${review.score} + ' / 10' : 'Not Reviewed Yet'">8.5 / 10</p>
+                </div>
+
+                <!-- Read-only Feedback -->
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-500">Detailed Feedback</label>
+                    <div class="bg-[#020817]/50 rounded-lg p-4 text-gray-300 text-sm leading-relaxed border border-gray-800 min-h-[120px]"
+                         th:text="${review != null} ? ${review.feedback} : 'No feedback yet.'">
+                        Review feedback content...
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="pt-6 flex flex-wrap gap-3 justify-end">
+                    <!-- Start Review if no review -->
+                    <a th:if="${review == null}" th:href="@{/reviews/submit/{id}(id=${paper.id})}"
+                       class="px-6 py-2 rounded-lg bg-gradient-to-r from-teal-600 to-blue-600 text-white font-medium hover:opacity-90 transition-opacity shadow-lg shadow-teal-500/20">
+                        Start Review
+                    </a>
+
+                    <!-- Edit Review if review exists -->
+                    <a th:if="${review != null}" th:href="@{/reviews/edit/{id}(id=${review.id})}"
+                       class="px-6 py-2 rounded-lg bg-gradient-to-r from-teal-600 to-blue-600 text-white font-medium hover:opacity-90 transition-opacity shadow-lg shadow-teal-500/20">
+                        Edit Review
+                    </a>
+
+                    <!-- Back -->
+                    <a th:href="@{/reviewer/assigned-papers}"
+                       class="px-4 py-2 text-gray-400 hover:text-white transition-colors">
+                        Back
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>
