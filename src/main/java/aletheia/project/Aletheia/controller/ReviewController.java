@@ -86,6 +86,7 @@ public class ReviewController {
 
             model.addAttribute("review", review);
             model.addAttribute("paper", review.getPaper()); // Helper for the view
+            model.addAttribute("returnUrl", "/reviews/my-reviews");
             
             return "reviewers/submit"; // Maps to templates/reviewers/submit.html
 
@@ -100,6 +101,7 @@ public class ReviewController {
     public String submitReview(@PathVariable Long id,
                                @RequestParam("score") BigDecimal score,
                                @RequestParam("feedback") String feedback,
+                               @RequestParam(required = false) String returnUrl,
                                @AuthenticationPrincipal UserDetails userDetails,
                                RedirectAttributes redirectAttributes) {
         try {
@@ -124,7 +126,7 @@ public class ReviewController {
 
 
             redirectAttributes.addFlashAttribute("success", "Review submitted successfully!");
-            return "redirect:/reviews/my-reviews";
+            return returnUrl != null ? "redirect:" + returnUrl : "redirect:/reviews/my-reviews";
 
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Failed to submit review.");
@@ -136,6 +138,7 @@ public class ReviewController {
     @GetMapping("/edit/{id}")
     public String editReviewForm(@PathVariable Long id,
                                 @AuthenticationPrincipal UserDetails userDetails,
+                                @RequestParam(required = false) String from,
                                 Model model,
                                 RedirectAttributes redirectAttributes) {
         try {
@@ -157,6 +160,14 @@ public class ReviewController {
 
             model.addAttribute("review", review);
             model.addAttribute("paper", review.getPaper());
+            model.addAttribute("returnUrl", "/reviews/view/" + id);
+
+            // ✅ Back / Cancel logic
+            if ("view".equalsIgnoreCase(from)) {
+                model.addAttribute("returnUrl", "/reviews/view/" + id);
+            } else {
+                model.addAttribute("returnUrl", "/reviews/my-reviews");
+            }
 
             return "reviewers/submit"; // reuse the same submit.html form for editing
 
@@ -171,6 +182,7 @@ public class ReviewController {
     public String saveEditedReview(@PathVariable Long id,
                                 @RequestParam("score") BigDecimal score,
                                 @RequestParam("feedback") String feedback,
+                                @RequestParam(required = false) String returnUrl,
                                 @AuthenticationPrincipal UserDetails userDetails,
                                 RedirectAttributes redirectAttributes) {
         try {
@@ -194,7 +206,7 @@ public class ReviewController {
             reviewRepository.save(review);
 
             redirectAttributes.addFlashAttribute("success", "Review updated successfully!");
-            return "redirect:/reviews/detail-review";
+            return returnUrl != null ? "redirect:" + returnUrl : "redirect:/reviews/view/" + id;
 
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Failed to update review: " + e.getMessage());

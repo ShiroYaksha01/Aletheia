@@ -90,7 +90,10 @@
                         </div>
 
                         <div class="pt-4 flex items-center justify-end gap-3">
-                            <a th:href="@{/reviews/assigned-papers}" class="px-4 py-2 text-gray-400 hover:text-white transition-colors">Cancel</a>
+                            <a th:href="${returnUrl}" 
+                            class="px-4 py-2 text-gray-400 hover:text-white transition-colors">
+                                Cancel
+                            </a>
                             <button type="submit" 
                                     class="px-6 py-2 rounded-lg bg-gradient-to-r from-teal-600 to-blue-600 text-white font-medium hover:opacity-90 transition-opacity shadow-lg shadow-teal-500/20"
                                     th:text="${review.status == 'COMPLETED'} ? 'Update Review' : 'Submit Review'">

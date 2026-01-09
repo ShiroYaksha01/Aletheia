@@ -53,7 +53,7 @@
                     <span th:if="${searchQuery != null or currentStatus != 'all'}">Try adjusting your search or filters</span>
                     <span th:unless="${searchQuery != null or currentStatus != 'all'}">Start by submitting your first research paper</span>
                 </p>
-                <a th:href="@{/papers/create}" class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-teal-600/10 text-teal-500 hover:bg-teal-600/20 transition-colors text-sm font-medium">
+                <a th:href="@{/papers/submit}" class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-teal-600/10 text-teal-500 hover:bg-teal-600/20 transition-colors text-sm font-medium">
                     Submit New Paper
                 </a>
             </div>
