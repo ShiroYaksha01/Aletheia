@@ -92,18 +92,31 @@
                         <div class="flex items-center gap-3 pt-4 border-t border-gray-800 mt-2">
                             
                             <a th:href="@{/papers/files/{filename}(filename=${review.paper.fileName})}" target="_blank"
-                               class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-gray-800 h-9 px-4 text-gray-300 border border-transparent hover:border-gray-700">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-gray-800 h-9 px-4 text-gray-300 border border-transparent hover:border-gray-700">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                </svg>
                                 Download PDF
                             </a>
 
                             <a th:href="@{/reviews/submit/{id}(id=${review.id})}" 
-                               class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-all h-9 px-4 text-white shadow-lg ml-auto"
-                               th:classappend="${review.status == 'COMPLETED' ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gradient-to-r from-teal-600 to-blue-600 hover:opacity-90 shadow-teal-500/20'}">
+                            class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-all h-9 px-4 text-white shadow-lg ml-auto"
+                            th:classappend="${review.status == 'COMPLETED' ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gradient-to-r from-teal-600 to-blue-600 hover:opacity-90 shadow-teal-500/20'}">
                                 <span th:text="${review.status == 'COMPLETED' ? 'View Review' : 'Start Review'}">Start Review</span>
-                                <svg th:unless="${review.status == 'COMPLETED'}" class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                                <svg th:unless="${review.status == 'COMPLETED'}" class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                                </svg>
                             </a>
+
+                            <!-- Edit Review button, visible only if review is COMPLETED -->
+                            <a th:if="${review.status == 'COMPLETED'}" 
+                                th:href="@{/reviews/edit/{id}(id=${review.id})}"
+                                class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 bg-teal-600/10 text-teal-500 hover:bg-teal-600/20 border border-teal-500/20 text-black transition-colors shadow-md">
+                                    Edit Review
+                            </a>
+
                         </div>
+
                     </div>
                 </div>
             </th:block>

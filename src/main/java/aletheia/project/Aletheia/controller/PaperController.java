@@ -92,7 +92,7 @@ public String showSubmitForm(Model model) {
 // Inside PaperController.java
 
     @GetMapping("/{id}")
-    public String viewPaper(@PathVariable("id") Long id, Model model, @AuthenticationPrincipal UserDetails userDetails) {
+    public String viewPaper(@PathVariable Long id, Model model, @AuthenticationPrincipal UserDetails userDetails) {
         // 1. Fetch Paper
         PaperEntity paper = paperService.findById(id)
             .orElseThrow(() -> new RuntimeException("Paper not found with id: " + id));
