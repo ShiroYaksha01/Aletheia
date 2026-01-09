@@ -3,22 +3,27 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/index}">
 <head>
-    <title>Submit Review</title>
+    <title th:text="${review != null} ? 'Edit Review' : 'Submit Review'">Submit Review</title>
 </head>
 <body>
 
     <div layout:fragment="content">
         <a th:href="@{/reviewer/assigned-papers}" class="inline-flex items-center text-sm text-gray-400 hover:text-white mb-6">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
             Back to Assigned Papers
         </a>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             
+            <!-- Paper Details -->
             <div class="space-y-6">
                 <div class="glass-card rounded-xl p-6 relative overflow-hidden">
                     <div class="absolute top-0 right-0 p-4 opacity-10">
-                        <svg class="w-32 h-32 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        <svg class="w-32 h-32 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
                     </div>
 
                     <h2 class="text-xl font-bold text-white mb-4">Paper Details</h2>
@@ -46,7 +51,9 @@
                         <div class="pt-4 border-t border-gray-800">
                             <a th:href="@{/files/{name}(name=${paper.fileName})}" target="_blank"
                                class="flex items-center justify-center w-full py-2.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-white transition-colors border border-gray-700">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                </svg>
                                 Download Full PDF
                             </a>
                         </div>
@@ -54,9 +61,10 @@
                 </div>
             </div>
 
+            <!-- Review Form -->
             <div class="space-y-6">
                 <div class="glass-card rounded-xl p-6">
-                    <h2 class="text-xl font-bold text-white mb-6">Evaluation</h2>
+                    <h2 class="text-xl font-bold text-white mb-6" th:text="${review != null} ? 'Edit Review' : 'Submit Review'">Submit Review</h2>
 
                     <form th:action="@{/reviews/submit/{id}(id=${review.id})}" method="post" class="space-y-6">
                         
@@ -65,7 +73,7 @@
                             <p class="text-xs text-gray-500 mb-2">Rate the paper based on quality, originality, and clarity.</p>
                             <div class="flex items-center gap-4">
                                 <input type="number" name="score" min="0" max="10" step="0.1" required
-                                       th:value="${review.score}"
+                                       th:value="${review != null} ? ${review.score} : ''"
                                        placeholder="8.5"
                                        class="w-32 bg-[#020817] border border-gray-800 rounded-lg px-4 py-2 text-white text-lg font-bold focus:ring-2 focus:ring-teal-500 outline-none text-center">
                                 <span class="text-gray-500">/ 10.0</span>
@@ -76,15 +84,16 @@
                             <label class="block text-sm font-medium text-gray-200">Detailed Feedback</label>
                             <p class="text-xs text-gray-500 mb-2">Provide constructive feedback for the authors.</p>
                             <textarea name="feedback" rows="10" required
-                                      th:text="${review.feedback}"
+                                      th:text="${review != null} ? ${review.feedback} : ''"
                                       placeholder="Write your review here..."
                                       class="w-full bg-[#020817] border border-gray-800 rounded-lg p-4 text-white focus:ring-1 focus:ring-teal-500 outline-none resize-none"></textarea>
                         </div>
 
                         <div class="pt-4 flex items-center justify-end gap-3">
-                            <a th:href="@{/reviewer/assigned-papers}" class="px-4 py-2 text-gray-400 hover:text-white transition-colors">Cancel</a>
+                            <a th:href="@{/reviews/assigned-papers}" class="px-4 py-2 text-gray-400 hover:text-white transition-colors">Cancel</a>
                             <button type="submit" 
-                                    class="px-6 py-2 rounded-lg bg-gradient-to-r from-teal-600 to-blue-600 text-white font-medium hover:opacity-90 transition-opacity shadow-lg shadow-teal-500/20">
+                                    class="px-6 py-2 rounded-lg bg-gradient-to-r from-teal-600 to-blue-600 text-white font-medium hover:opacity-90 transition-opacity shadow-lg shadow-teal-500/20"
+                                    th:text="${review.status == 'COMPLETED'} ? 'Update Review' : 'Submit Review'">
                                 Submit Review
                             </button>
                         </div>
