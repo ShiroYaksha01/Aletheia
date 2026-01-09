@@ -308,10 +308,12 @@ public String showSubmitForm(Model model) {
         }
 
         if (bindingResult.hasErrors()) {
-            model.addAttribute("paper", paper);
+            // Repopulate form with current file info
+            paperRequest.setFileName(paper.getFileName());
+            model.addAttribute("paperRequest", paperRequest);
             model.addAttribute("paperId", id);
             model.addAttribute("editMode", true);
-            return "papers/edit";
+            return "papers/submit";
         }
 
         String finalResearchArea = paperRequest.getResearchArea();

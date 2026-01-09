@@ -162,7 +162,7 @@
                 <div class="glass-card rounded-xl p-8 space-y-4 border border-gray-700/50">
                     <div class="flex items-center gap-2 mb-6">
                         <h2 class="text-xl font-bold text-white">Paper File</h2>
-                        <span id="fileCheck" class="text-red-400" th:if="!${editMode}">*</span>
+                        <span th:if="!${editMode}" id="fileCheck" class="text-red-400">*</span>
                     </div>
 
                     <!-- Show existing file in edit mode - ALWAYS VISIBLE -->
@@ -292,6 +292,7 @@
         <script>
             // Get editMode from Thymeleaf
             const isEditMode = /*[[${editMode}]]*/ false;
+            console.log('Edit Mode:', isEditMode); // Debug log
             let errorAlertTimeout, successAlertTimeout;
 
             // Alert Functions
@@ -393,6 +394,8 @@
 
             // Form Validation
             function validateForm(event) {
+                console.log('Validating form, isEditMode:', isEditMode); // Debug log
+                
                 const title = document.getElementById('title').value.trim();
                 const abstract = document.getElementById('abstract').value.trim();
                 const researchArea = document.getElementById('researchAreaSelect').value;
@@ -436,13 +439,14 @@
                     return false;
                 }
 
-                // Validate File
-                if (!isEditMode && (!fileInput.files || fileInput.files.length === 0)) {
-                    event.preventDefault();
-                    showAlert('Please upload a PDF file!', 'error');
-                    document.getElementById('fileInput').click();
-                    return false;
-                }
+                // // Validate File
+                // console.log('File validation - isEditMode:', isEditMode, 'hasFiles:', fileInput.files && fileInput.files.length > 0); // Debug log
+                // if (!isEditMode && (!fileInput.files || fileInput.files.length === 0)) {
+                //     event.preventDefault();
+                //     showAlert('Please upload a PDF file!', 'error');
+                //     document.getElementById('fileInput').click();
+                //     return false;
+                // }
 
                 return true;
             }
