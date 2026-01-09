@@ -165,28 +165,32 @@
                         <span id="fileCheck" class="text-red-400" th:if="!${editMode}">*</span>
                     </div>
 
+                    <!-- Show existing file in edit mode - ALWAYS VISIBLE -->
+                    <div th:if="${editMode} and ${paperRequest.fileName != null}" 
+                         id="currentFileSection"
+                         class="w-full mb-6 p-4 bg-gray-800/50 border border-gray-600 rounded-lg">
+                        <div class="flex items-center justify-between gap-3">
+                            <div class="flex items-center gap-3 flex-1">
+                                <svg class="w-8 h-8 text-blue-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd" />
+                                </svg>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="text-xs font-semibold text-gray-400 uppercase">Current File</span>
+                                    </div>
+                                    <p class="text-sm text-gray-200 font-medium truncate"
+                                       th:text="${paperRequest.fileName}">current-file.pdf</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- File Upload Area -->
-                    <div class="border-2 border-dashed border-gray-700 rounded-lg p-8 text-center hover:border-teal-500/50 hover:bg-teal-500/5 transition-all duration-300 min-h-96 flex flex-col items-center justify-center"
+                    <div class="border-2 border-dashed border-gray-700 rounded-lg p-8 text-center hover:border-teal-500/50 hover:bg-teal-500/5 transition-all duration-300 min-h-64 flex flex-col items-center justify-center"
                          id="dropZone"
                          ondrop="handleDrop(event)"
                          ondragover="handleDragOver(event)"
                          ondragleave="handleDragLeave(event)">
-
-                        <!-- Show existing file in edit mode -->
-                        <div th:if="${editMode} and ${paperRequest.fileName != null}" class="w-full mb-6">
-                            <div class="flex items-center justify-center gap-2 text-green-400 mb-4">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M8.707 15.707a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L7 13.586V8a1 1 0 012 0v5.586l3.293-3.293a1 1 0 011.414 1.414l-4 4z" clip-rule="evenodd" />
-                                </svg>
-                                <span class="font-semibold">Current File</span>
-                            </div>
-                            <p class="text-sm text-gray-300 mb-2">
-                                <a th:href="@{'/papers/files/' + ${paperRequest.fileName}}" 
-                                   target="_blank"
-                                   class="text-teal-400 hover:text-teal-300 underline font-semibold"
-                                   th:text="${paperRequest.fileName}">PDF</a>
-                            </p>
-                        </div>
 
                         <!-- File Input -->
                         <div class="space-y-4 w-full">
@@ -194,39 +198,55 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3v-6" />
                             </svg>
                             
-                            <div>
-                                <label for="fileInput" class="cursor-pointer inline-block">
-                                    <span class="text-teal-400 hover:text-teal-300 font-semibold underline">Click to upload</span>
-                                </label>
-                                <span class="text-gray-400"> or drag & drop</span>
-                                <input 
-                                    type="file" 
-                                    id="fileInput"
-                                    name="file" 
-                                    accept=".pdf"
-                                    class="hidden"
-                                    onchange="handleFileSelect(this)">
+                            <div class="flex flex-col items-center gap-2">
+                                <button type="button"
+                                        onclick="document.getElementById('fileInput').click()"
+                                        class="text-teal-400 hover:text-teal-300 font-semibold underline px-4 py-2 rounded bg-transparent">
+                                    <span th:if="${editMode}">Upload New File</span>
+                                    <span th:unless="${editMode}">Click to upload</span>
+                                </button>
+                                <span class="text-gray-400">or drag & drop</span>
                             </div>
 
-                            <p class="text-xs text-gray-500">PDF only, max 10MB</p>
+                            <!-- Hidden real input -->
+                            <input
+                                type="file"
+                                id="fileInput"
+                                name="file"
+                                accept=".pdf"
+                                class="hidden"
+                                onchange="handleFileSelect(this)">
+                            <p class="text-xs text-gray-500 mt-2">PDF only, max 10MB</p>
                         </div>
 
-                        <!-- File Status -->
-                        <div id="fileStatus" class="mt-4 w-full hidden">
-                            <div id="fileSuccess" class="hidden p-3 bg-green-900/30 border border-green-700 rounded-lg">
-                                <div class="flex items-center gap-2 text-green-400">
-                                    <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                                    </svg>
-                                    <span id="fileName" class="text-sm font-semibold"></span>
+                        <!-- New File Status - Shows below upload area -->
+                        <div id="fileStatus" class="mt-6 w-full hidden">
+                            <div id="fileSuccess" class="hidden p-4 bg-green-900/30 border border-green-700 rounded-lg">
+                                <div class="flex items-center justify-between gap-3">
+                                    <div class="flex items-center gap-3 flex-1 min-w-0">
+                                        <svg class="w-6 h-6 text-green-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                        </svg>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="text-xs font-semibold text-green-400 uppercase mb-1">New File Ready</div>
+                                            <span id="fileName" class="text-sm font-medium text-green-300 block truncate"></span>
+                                        </div>
+                                    </div>
+                                    <button type="button" 
+                                            onclick="clearFileSelection()"
+                                            class="text-green-400 hover:text-green-300 flex-shrink-0">
+                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                        </svg>
+                                    </button>
                                 </div>
                             </div>
-                            <div id="fileError" class="hidden p-3 bg-red-900/30 border border-red-700 rounded-lg">
-                                <div class="flex items-center gap-2 text-red-400">
-                                    <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <div id="fileError" class="hidden p-4 bg-red-900/30 border border-red-700 rounded-lg">
+                                <div class="flex items-center gap-3">
+                                    <svg class="w-6 h-6 text-red-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
                                     </svg>
-                                    <span id="fileErrorMsg" class="text-sm font-semibold"></span>
+                                    <span id="fileErrorMsg" class="text-sm font-semibold text-red-400"></span>
                                 </div>
                             </div>
                         </div>
@@ -443,8 +463,10 @@
             }
 
             // File handling
-            function handleFileSelect(input) {
-                const file = input.files[0];
+            function handleFileSelect(inputOrFile) {
+                const file = inputOrFile instanceof File ? inputOrFile : (inputOrFile && inputOrFile.files ? inputOrFile.files[0] : null);
+                if (!file) return;
+
                 const fileStatus = document.getElementById('fileStatus');
                 const fileSuccess = document.getElementById('fileSuccess');
                 const fileError = document.getElementById('fileError');
@@ -452,42 +474,65 @@
                 const fileErrorMsg = document.getElementById('fileErrorMsg');
                 const fileCheck = document.getElementById('fileCheck');
 
-                if (!file) return;
-                if (!fileCheck) return;
-
                 // Validate file type
                 if (!file.name.toLowerCase().endsWith('.pdf')) {
                     showAlert('Invalid file type. Please upload a PDF file.', 'error');
-                    fileError.classList.remove('hidden');
-                    fileSuccess.classList.add('hidden');
-                    fileErrorMsg.textContent = 'Invalid file type - PDF only';
-                    fileStatus.classList.remove('hidden');
-                    fileCheck.classList.add('hidden');
-                    input.value = '';
+                    if (fileError) fileError.classList.remove('hidden');
+                    if (fileSuccess) fileSuccess.classList.add('hidden');
+                    if (fileErrorMsg) fileErrorMsg.textContent = 'Invalid file type - PDF only';
+                    if (fileStatus) fileStatus.classList.remove('hidden');
+                    if (fileCheck) fileCheck.classList.remove('hidden');
+                    if (inputOrFile && inputOrFile.files) inputOrFile.value = '';
                     return;
                 }
 
                 // Validate file size (10MB)
                 if (file.size > 10 * 1024 * 1024) {
                     showAlert('File size exceeds 10MB limit.', 'error');
-                    fileError.classList.remove('hidden');
-                    fileSuccess.classList.add('hidden');
-                    fileErrorMsg.textContent = 'File too large (max 10MB)';
-                    fileStatus.classList.remove('hidden');
-                    fileCheck.classList.add('hidden');
-                    input.value = '';
+                    if (fileError) fileError.classList.remove('hidden');
+                    if (fileSuccess) fileSuccess.classList.add('hidden');
+                    if (fileErrorMsg) fileErrorMsg.textContent = 'File too large (max 10MB)';
+                    if (fileStatus) fileStatus.classList.remove('hidden');
+                    if (fileCheck) fileCheck.classList.remove('hidden');
+                    if (inputOrFile && inputOrFile.files) inputOrFile.value = '';
                     return;
                 }
 
-                // File is valid
+                // File is valid - show success
                 showAlert('File uploaded successfully!', 'success');
-                fileSuccess.classList.remove('hidden');
-                fileError.classList.add('hidden');
-                fileName.textContent = file.name + ' (' + (file.size / 1024 / 1024).toFixed(2) + ' MB)';
-                fileStatus.classList.remove('hidden');
-                fileCheck.classList.add('hidden');
+                if (fileSuccess) fileSuccess.classList.remove('hidden');
+                if (fileError) fileError.classList.add('hidden');
+                if (fileName) fileName.textContent = file.name + ' (' + (file.size / 1024 / 1024).toFixed(2) + ' MB)';
+                if (fileStatus) fileStatus.classList.remove('hidden');
+                if (fileCheck) fileCheck.classList.add('hidden');
+
+                // Ensure the actual input has the file
+                if (!(inputOrFile instanceof File)) {
+                    const fileInput = document.getElementById('fileInput');
+                    if (fileInput && fileInput.files.length === 0) {
+                        try {
+                            const dt = new DataTransfer();
+                            dt.items.add(file);
+                            fileInput.files = dt.files;
+                        } catch (e) {
+                            // Browser doesn't support DataTransfer
+                        }
+                    }
+                }
             }
 
+            // Clear file selection
+            function clearFileSelection() {
+                const fileInput = document.getElementById('fileInput');
+                const fileStatus = document.getElementById('fileStatus');
+                const fileCheck = document.getElementById('fileCheck');
+                
+                if (fileInput) fileInput.value = '';
+                if (fileStatus) fileStatus.classList.add('hidden');
+                if (fileCheck && !isEditMode) fileCheck.classList.remove('hidden');
+                
+                showAlert('File selection cleared', 'success');
+            }
             // Drag and drop
             function handleDragOver(e) {
                 e.preventDefault();

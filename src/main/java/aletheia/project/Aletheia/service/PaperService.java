@@ -73,6 +73,10 @@ public class PaperService {
         return paperRepository.findAll();
     }
 
+    // public PaperEntity getPaperById(Long id) {
+    //     return paperRepository.findById(id).orElseThrow(() -> new RuntimeException("Paper not found"));
+    // }
+
     public Optional<PaperEntity> findById(Long id) {
         return paperRepository.findById(id);
     }

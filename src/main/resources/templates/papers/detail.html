@@ -109,7 +109,7 @@
                         </div>
                         <div>
                             <p class="text-xs text-gray-500 uppercase">Submitted On</p>
-                            <p class="text-gray-300" th:text="${#temporals.format(paper.createdAt, 'dd MMM yyyy')}">01 Jan 2024</p>
+                            <p class="text-gray-300" th:text="${#temporals.format(paper.createdAt, 'dd MMM yyyy')}">01 Jan 2026</p>
                         </div>
                         <div>
                             <p class="text-xs text-gray-500 uppercase">File Name</p>
@@ -129,6 +129,13 @@
                        class="flex items-center justify-center w-full h-10 rounded-lg bg-gray-800 hover:bg-gray-700 text-white transition-colors border border-gray-700">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                         Download PDF
+                    </a>
+
+                    <a th:href="@{/papers/{id}/preview(id=${paper.id})}" 
+                        target="_blank"
+                        class="flex items-center justify-center w-full h-10 rounded-lg bg-purple-600/10 text-purple-500 hover:bg-purple-600/20 transition-colors border border-purple-500/20">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                        View PDF
                     </a>
                     
                     <!-- Admin-only action -->
