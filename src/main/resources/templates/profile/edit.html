@@ -71,8 +71,10 @@
                                         <label for="role" class="block text-sm font-medium text-gray-300 mb-2">Primary Role</label>
                                         <select id="role" th:field="*{role}" required
                                                 class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors">
-                                            <option value="RESEARCHER">Researcher</option>
-                                            <option value="REVIEWER">Reviewer</option>
+                                            <option th:each="role : ${availableRoles}" 
+                                                    th:value="${role}" 
+                                                    th:text="${role}"
+                                                    th:selected="${role == user.role}">Role</option>
                                         </select>
                                         <p class="text-sm text-gray-400 mt-1">Choose your primary role in the system</p>
                                     </div>
