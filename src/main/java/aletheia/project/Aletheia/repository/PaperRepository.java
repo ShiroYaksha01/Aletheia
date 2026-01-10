@@ -12,6 +12,8 @@ import java.util.List;
 @Repository
 public interface PaperRepository extends JpaRepository<PaperEntity, Long> {
     List<PaperEntity> findByAuthorId(Long authorID);
+    
+    PaperEntity findByFilePath(String filePath);
 
     @Query("SELECT p FROM PaperEntity p WHERE p.author = :author " +
             "AND (:keyword IS NULL OR LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
