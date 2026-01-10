@@ -183,8 +183,8 @@ public class AdminController {
 
     //  === PAPER MANAGEMENT WITH FILTERS ===
     @GetMapping("/papers")
-    public String managePapers(@RequestParam(required = false) String search,
-                               @RequestParam(required = false, defaultValue = "all") String status,
+    public String managePapers(@RequestParam(value = "search", required = false) String search,
+                               @RequestParam(value = "status", required = false, defaultValue = "all") String status,
                                Model model) {
         
         // 1. Fetch All Papers

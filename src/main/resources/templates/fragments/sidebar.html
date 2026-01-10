@@ -47,14 +47,14 @@
             </nav>
 
             <div class="border-t border-gray-800 p-4">
-                <div class="flex items-center gap-3">
+                <a th:href="@{/profile}" class="flex items-center gap-3 hover:bg-gray-800 p-2 rounded-lg transition-colors">
                     <div class="w-10 h-10 rounded-full bg-teal-500 flex items-center justify-center text-white font-medium" 
                          th:text="${#strings.substring(user.firstName, 0, 1)}">U</div>
                     <div class="flex-1 min-w-0">
                         <p class="text-sm font-medium text-white truncate" th:text="|${user.firstName} ${user.lastName}|">User Name</p>
                         <p class="text-xs text-gray-500 truncate" th:text="${user.email}">user@email.com</p>
                     </div>
-                </div>
+                </a>
                 <form th:action="@{/logout}" method="post" class="mt-2">
                     <button type="submit" class="w-full text-left text-xs text-gray-400 hover:text-white">Logout</button>
                 </form>

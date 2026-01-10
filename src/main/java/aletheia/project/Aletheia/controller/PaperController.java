@@ -11,6 +11,7 @@ import aletheia.project.Aletheia.service.PaperService;
 import jakarta.validation.Valid;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -36,6 +37,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 
 @Controller
@@ -67,8 +69,8 @@ public String showSubmitForm(Model model) {
     @GetMapping("/my-papers")
     public String myPapers(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestParam(required = false) String search,
-            @RequestParam(required = false, defaultValue = "all") String status,
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "status", required = false, defaultValue = "all") String status,
             Model model) {
         
         // 1. Get current user
@@ -306,10 +308,12 @@ public String showSubmitForm(Model model) {
         }
 
         if (bindingResult.hasErrors()) {
-            model.addAttribute("paper", paper);
+            // Repopulate form with current file info
+            paperRequest.setFileName(paper.getFileName());
+            model.addAttribute("paperRequest", paperRequest);
             model.addAttribute("paperId", id);
             model.addAttribute("editMode", true);
-            return "papers/edit";
+            return "papers/submit";
         }
 
         String finalResearchArea = paperRequest.getResearchArea();
@@ -359,6 +363,45 @@ public String showSubmitForm(Model model) {
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("error", "Failed to delete paper: " + e.getMessage());
             return "redirect:/papers/" + id;
+        }
+    }
+
+     @GetMapping("/{id}/preview")
+    public ResponseEntity<Resource> previewPaper(@PathVariable Long id) {
+        PaperEntity paper = paperService.findById(id)
+                .orElseThrow(() -> new RuntimeException("Paper not found"));
+        
+        // Resolve the file path within the upload directory
+        Path uploadPath = Paths.get(uploadDir).toAbsolutePath();
+        Path filePath = uploadPath.resolve(paper.getFilePath()).normalize();
+        
+        // Security check: ensure the resolved file is within the upload directory
+        if (!filePath.startsWith(uploadPath)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        if (!Files.exists(filePath) || Files.isDirectory(filePath)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        try {
+            Resource resource = new UrlResource(filePath.toUri());
+            String contentType = Files.probeContentType(filePath);
+            if (contentType == null) {
+                contentType = "application/pdf";
+            }
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.parseMediaType(contentType));
+            headers.setContentDisposition(ContentDisposition.inline()
+                    .filename(paper.getFileName()) // Use original filename for display
+                    .build());
+
+            return ResponseEntity.ok().headers(headers).body(resource);
+        } catch (MalformedURLException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IOException e) {
+            return ResponseEntity.status(500).build();
         }
     }
 
