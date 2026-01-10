@@ -6,70 +6,116 @@
     <title th:text="${pageTitle}">Edit Profile - Aletheia</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-900">
     <!-- Include sidebar -->
     <div th:replace="~{fragments/sidebar :: sidebar}"></div>
 
     <!-- Main content -->
     <div class="ml-64 min-h-screen">
         <div class="p-8">
+            <!-- Header -->
             <div class="mb-8">
-                <h1 class="text-3xl font-bold text-gray-900" th:text="${pageTitle}">Edit Profile</h1>
-                <p class="text-gray-600 mt-2" th:text="${pageSubtitle}">Update your personal information</p>
+                <h1 class="text-3xl font-bold text-white" th:text="${pageTitle}">Edit Profile</h1>
+                <p class="text-gray-400 mt-2" th:text="${pageSubtitle}">Update your personal information</p>
             </div>
 
             <!-- Success Message -->
-            <div th:if="${successMessage}" class="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md">
+            <div th:if="${successMessage}" class="mb-6 bg-teal-900/50 border border-teal-500 text-teal-300 px-4 py-3 rounded-lg">
                 <span th:text="${successMessage}"></span>
             </div>
 
-            <div class="max-w-2xl">
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                    <div class="px-6 py-4 border-b border-gray-200">
-                        <h2 class="text-lg font-semibold text-gray-900">Profile Information</h2>
+            <!-- Error Message -->
+            <div th:if="${errorMessage}" class="mb-6 bg-red-900/50 border border-red-500 text-red-300 px-4 py-3 rounded-lg">
+                <span th:text="${errorMessage}"></span>
+            </div>
+
+            <div class="max-w-4xl">
+                <div class="bg-gray-800 rounded-lg border border-gray-700">
+                    <div class="px-6 py-4 border-b border-gray-700">
+                        <h2 class="text-lg font-semibold text-white">Profile Information</h2>
+                        <p class="text-gray-400 text-sm mt-1">Update your account details and preferences</p>
                     </div>
                     
                     <div class="p-6">
                         <form th:action="@{/profile/update}" method="post" th:object="${user}">
-                            <div class="mb-6">
-                                <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-                                <input type="email" id="email" th:field="*{email}" readonly
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 cursor-not-allowed">
-                                <p class="text-sm text-gray-500 mt-1">Email cannot be changed</p>
-                            </div>
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                <!-- Left Column -->
+                                <div class="space-y-6">
+                                    <!-- Email -->
+                                    <div>
+                                        <label for="email" class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+                                        <input type="email" id="email" th:field="*{email}"
+                                               class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors">
+                                        <p class="text-sm text-gray-400 mt-1">Changing email will require verification</p>
+                                    </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                                <div>
-                                    <label for="firstName" class="block text-sm font-medium text-gray-700 mb-2">First Name</label>
-                                    <input type="text" id="firstName" th:field="*{firstName}" required
-                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+                                    <!-- First Name -->
+                                    <div>
+                                        <label for="firstName" class="block text-sm font-medium text-gray-300 mb-2">First Name</label>
+                                        <input type="text" id="firstName" th:field="*{firstName}" required
+                                               class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors">
+                                    </div>
+
+                                    <!-- Last Name -->
+                                    <div>
+                                        <label for="lastName" class="block text-sm font-medium text-gray-300 mb-2">Last Name</label>
+                                        <input type="text" id="lastName" th:field="*{lastName}" required
+                                               class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors">
+                                    </div>
                                 </div>
-                                <div>
-                                    <label for="lastName" class="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
-                                    <input type="text" id="lastName" th:field="*{lastName}" required
-                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+
+                                <!-- Right Column -->
+                                <div class="space-y-6">
+                                    <!-- Role Selection -->
+                                    <div>
+                                        <label for="role" class="block text-sm font-medium text-gray-300 mb-2">Primary Role</label>
+                                        <select id="role" th:field="*{role}" required
+                                                class="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors">
+                                            <option value="RESEARCHER">Researcher</option>
+                                            <option value="REVIEWER">Reviewer</option>
+                                        </select>
+                                        <p class="text-sm text-gray-400 mt-1">Choose your primary role in the system</p>
+                                    </div>
+
+                                    <!-- Account Status -->
+                                    <div class="p-4 bg-gray-700/50 rounded-lg border border-gray-600">
+                                        <h3 class="text-sm font-medium text-gray-300 mb-2">Account Status</h3>
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                            <span class="text-sm text-green-400">Active</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Current Role Badge -->
+                                    <div class="p-4 bg-teal-900/30 rounded-lg border border-teal-700">
+                                        <h3 class="text-sm font-medium text-gray-300 mb-2">Current Role</h3>
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-teal-500/20 text-teal-300 border border-teal-500/30" 
+                                              th:text="${user.role}">RESEARCHER</span>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="mb-6">
-                                <label for="role" class="block text-sm font-medium text-gray-700 mb-2">Primary Role</label>
-                                <select id="role" th:field="*{role}" required
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
-                                    <option value="RESEARCHER">RESEARCHER</option>
-                                    <option value="REVIEWER">REVIEWER</option>
-                                </select>
-                                <p class="text-sm text-gray-500 mt-1">Choose your primary role in the system</p>
-                            </div>
-
-                            <div class="flex justify-between pt-6">
-                                <button type="submit" 
-                                        class="px-6 py-2 bg-teal-600 text-white font-medium rounded-md hover:bg-teal-700 focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition-colors">
-                                    Update Profile
-                                </button>
-                                <a th:href="@{/dashboard}" 
-                                   class="px-6 py-2 bg-gray-100 text-gray-700 font-medium rounded-md hover:bg-gray-200 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors">
-                                    Back to Dashboard
-                                </a>
+                            <!-- Action Buttons -->
+                            <div class="flex justify-between items-center pt-8 mt-8 border-t border-gray-700">
+                                <div class="flex gap-3">
+                                    <button type="submit" 
+                                            class="px-6 py-3 bg-teal-600 text-white font-medium rounded-lg hover:bg-teal-700 focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-colors">
+                                        Update Profile
+                                    </button>
+                                    <a th:href="@{/dashboard}" 
+                                       class="px-6 py-3 bg-gray-700 text-gray-300 font-medium rounded-lg hover:bg-gray-600 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-colors">
+                                        Cancel
+                                    </a>
+                                </div>
+                                
+                                <!-- Danger Zone -->
+                                <div>
+                                    <button type="button" 
+                                            class="px-4 py-2 text-red-400 text-sm hover:text-red-300 transition-colors"
+                                            onclick="alert('Contact administrator to deactivate account')">
+                                        Deactivate Account
+                                    </button>
+                                </div>
                             </div>
                         </form>
                     </div>
