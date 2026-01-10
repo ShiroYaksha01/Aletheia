@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+    <!--
+      Generic Delete Confirmation Modal Fragment
+      - To use, include this fragment in your page.
+      - The page must have buttons with the class 'open-delete-modal'.
+      - Each button must be inside a form with the class 'delete-form' that has the correct th:action.
+    -->
+    <div th:fragment="delete-modal">
+        <!-- Delete Confirmation Modal -->
+        <div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="glass-card rounded-lg p-8 max-w-sm w-full">
+                <h3 class="text-xl font-bold text-white mb-4">Confirm Deletion</h3>
+                <p class="text-gray-300 mb-6">Are you sure you want to delete this item? This action cannot be undone.</p>
+                <div class="flex justify-end gap-4">
+                    <button id="cancel-delete" class="px-4 py-2 rounded-md text-sm font-medium text-gray-300 bg-gray-700 hover:bg-gray-600 transition-colors">Cancel</button>
+                    <button id="confirm-delete" class="px-4 py-2 rounded-md text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition-colors">Delete</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Ensure this script is loaded only once, even if the fragment is included multiple times.
+            if (!window.deleteModalScriptLoaded) {
+                window.deleteModalScriptLoaded = true;
+
+                document.addEventListener('DOMContentLoaded', () => {
+                    const deleteModal = document.getElementById('delete-modal');
+                    const cancelDeleteBtn = document.getElementById('cancel-delete');
+                    const confirmDeleteBtn = document.getElementById('confirm-delete');
+                    let formToSubmit = null;
+
+                    // Use event delegation on the body to handle clicks on dynamically added buttons
+                    document.body.addEventListener('click', (e) => {
+                        const openBtn = e.target.closest('.open-delete-modal');
+                        if (openBtn) {
+                            e.preventDefault();
+                            formToSubmit = openBtn.closest('.delete-form');
+                            if (deleteModal) {
+                                deleteModal.classList.remove('hidden');
+                            }
+                        }
+                    });
+
+                    if (cancelDeleteBtn) {
+                        cancelDeleteBtn.addEventListener('click', () => {
+                            deleteModal.classList.add('hidden');
+                            formToSubmit = null;
+                        });
+                    }
+
+                    if (confirmDeleteBtn) {
+                        confirmDeleteBtn.addEventListener('click', () => {
+                            if (formToSubmit) {
+                                formToSubmit.submit();
+                            }
+                        });
+                    }
+
+                    // Close modal if clicking outside of it
+                    if (deleteModal) {
+                        deleteModal.addEventListener('click', (e) => {
+                            if (e.target === deleteModal) {
+                                deleteModal.classList.add('hidden');
+                                formToSubmit = null;
+                            }
+                        });
+                    }
+                });
+            }
+        </script>
+    </div>
+
+</body>
+</html>
