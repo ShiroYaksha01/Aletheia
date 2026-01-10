@@ -1,10 +1,20 @@
 package aletheia.project.Aletheia.controller;
 
+import aletheia.project.Aletheia.entity.PaperEntity;
 import aletheia.project.Aletheia.entity.ReviewEntity;
 import aletheia.project.Aletheia.entity.UserEntity;
 import aletheia.project.Aletheia.repository.ReviewRepository;
 import aletheia.project.Aletheia.repository.UserRepository;
 import aletheia.project.Aletheia.service.PaperService;
+import aletheia.project.Aletheia.repository.PaperRepository;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -12,7 +22,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,11 +39,16 @@ public class ReviewController {
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final PaperService paperService;
+    private final PaperRepository paperRepository;
 
-    public ReviewController(ReviewRepository reviewRepository, UserRepository userRepository, PaperService paperService) {
+    @Value("${file.upload-dir:uploads/papers}")
+    private String uploadDir;
+
+    public ReviewController(ReviewRepository reviewRepository, UserRepository userRepository, PaperService paperService, PaperRepository paperRepository) {
         this.reviewRepository = reviewRepository;
         this.userRepository = userRepository;
         this.paperService = paperService;
+        this.paperRepository = paperRepository;
     }
     @GetMapping("/my-reviews")
     public String myReviews(@AuthenticationPrincipal UserDetails userDetails,
@@ -162,7 +182,7 @@ public class ReviewController {
             model.addAttribute("paper", review.getPaper());
             model.addAttribute("returnUrl", "/reviews/view/" + id);
 
-            // ✅ Back / Cancel logic
+            // Back / Cancel logic
             if ("view".equalsIgnoreCase(from)) {
                 model.addAttribute("returnUrl", "/reviews/view/" + id);
             } else {
@@ -238,11 +258,101 @@ public class ReviewController {
 
             model.addAttribute("review", review);
             model.addAttribute("paper", review.getPaper());
-
+            
             return "reviewers/detail-review";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Error loading review: " + e.getMessage());
             return "redirect:/reviewer/assigned-papers";
+        }
+    }
+
+    @GetMapping("/files/{filename:.+}")
+    @ResponseBody
+    public ResponseEntity<Resource> downloadPaperFile(@PathVariable String filename,
+                                                      @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            UserEntity reviewer = userRepository.findByEmail(userDetails.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            // Find the paper by filePath to get the original filename
+            PaperEntity paper = paperRepository.findByFilePath(filename);
+            String originalFilename = (paper != null && paper.getFileName() != null) 
+                    ? paper.getFileName() 
+                    : filename;
+
+            Path uploadPath = Paths.get(uploadDir).toAbsolutePath();
+            Path file = uploadPath.resolve(filename).normalize();
+            
+            if (!file.startsWith(uploadPath)) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            if (!Files.exists(file)) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            Resource resource = new UrlResource(file.toUri());
+            
+            if (resource.exists() && resource.isReadable()) {
+                return ResponseEntity.ok()
+                        .contentType(MediaType.APPLICATION_PDF)
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + originalFilename + "\"")
+                        .body(resource);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+    @GetMapping("/{reviewId}/preview")
+    public ResponseEntity<Resource> previewPaper(@PathVariable Long reviewId,
+                                                @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            // 1. Fetch the review to get the associated paper
+            ReviewEntity review = reviewRepository.findById(reviewId)
+                    .orElseThrow(() -> new RuntimeException("Review not found"));
+
+            // 2. Security check: Ensure current user is the assigned reviewer
+            if (!review.getReviewer().getEmail().equals(userDetails.getUsername())) {
+                return ResponseEntity.status(403).build();
+            }
+
+            PaperEntity paper = review.getPaper();
+            
+            // Resolve the file path within the upload directory
+            Path uploadPath = Paths.get(uploadDir).toAbsolutePath();
+            Path filePath = uploadPath.resolve(paper.getFilePath()).normalize();
+            
+            // Security check: ensure the resolved file is within the upload directory
+            if (!filePath.startsWith(uploadPath)) {
+                return ResponseEntity.notFound().build();
+            }
+
+            if (!Files.exists(filePath) || Files.isDirectory(filePath)) {
+                return ResponseEntity.notFound().build();
+            }
+
+            Resource resource = new UrlResource(filePath.toUri());
+            String contentType = Files.probeContentType(filePath);
+            if (contentType == null) {
+                contentType = "application/pdf";
+            }
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.parseMediaType(contentType));
+            headers.setContentDisposition(ContentDisposition.inline()
+                    .filename(paper.getFileName())
+                    .build());
+
+            return ResponseEntity.ok().headers(headers).body(resource);
+        } catch (MalformedURLException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IOException e) {
+            return ResponseEntity.status(500).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
         }
     }
 
