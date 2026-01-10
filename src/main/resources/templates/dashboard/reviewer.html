@@ -13,8 +13,8 @@
             <div class="glass-card rounded-xl p-6">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm text-gray-400">Papers to Review</p>
-                        <p class="text-3xl font-bold text-white" th:text="${pendingReviews}">0</p>
+                        <p class="text-sm text-gray-400">All assigned papers</p>
+                        <p class="text-3xl font-bold text-white" th:text="${assignedReview}">0</p>
                     </div>
                     <div class="p-3 bg-orange-500/10 rounded-lg text-orange-500">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -37,8 +37,8 @@
             <div class="glass-card rounded-xl p-6">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm text-gray-400">In Progress</p>
-                        <p class="text-3xl font-bold text-white" th:text="${inProgressReviews}">0</p>
+                        <p class="text-sm text-gray-400">Pending Reviews</p>
+                        <p class="text-3xl font-bold text-white" th:text="${PendingReviews}">0</p>
                     </div>
                     <div class="p-3 bg-blue-500/10 rounded-lg text-blue-500">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -51,14 +51,30 @@
             <div class="glass-card rounded-xl p-6">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-lg font-semibold text-white">Recent Assignments</h2>
-                    <a href="/reviews" class="text-blue-400 hover:text-blue-300 text-sm">View All</a>
+                    <a href="/reviews/my-reviews" class="text-blue-400 hover:text-blue-300 text-sm">View All</a>
                 </div>
                 
                 <div class="space-y-3">
-                    <div class="flex items-center justify-between p-3 bg-gray-800/30 rounded-lg border border-gray-700/50">
+                    <div th:if="${#lists.isEmpty(recentAssignments)}" class="flex items-center justify-between p-3 bg-gray-800/30 rounded-lg border border-gray-700/50">
                         <div>
                             <p class="text-white font-medium">Waiting for assignment</p>
                             <p class="text-sm text-gray-400">No papers assigned yet</p>
+                        </div>
+                    </div>
+                    
+                    <div th:each="review : ${recentAssignments}" class="flex items-center justify-between p-3 bg-gray-800/30 rounded-lg border border-gray-700/50">
+                        <div>
+                            <p class="text-white font-medium" th:text="${review.paper.title}">Paper Title</p>
+                            <p class="text-sm text-gray-400">
+                                <span th:text="${review.status}">Status</span> • 
+                                Deadline: <span th:text="${#temporals.format(review.deadline, 'MMM dd, yyyy')}">Date</span>
+                            </p>
+                        </div>
+                        <div th:if="${review.status == 'PENDING'}" class="text-orange-400 text-sm">
+                            <a th:href="@{/reviews/submit/{id}(id=${review.id})}" class="hover:text-orange-300">Review</a>
+                        </div>
+                        <div th:if="${review.status == 'COMPLETED'}" class="text-green-400 text-sm">
+                            Completed
                         </div>
                     </div>
                 </div>

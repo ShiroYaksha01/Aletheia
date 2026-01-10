@@ -52,6 +52,24 @@ public class WebController {
             model.addAttribute("totalReviews", reviewRepository.count());
             return "dashboard/admin";
         } else if ("REVIEWER".equalsIgnoreCase(role)) {
+            // Fetch reviewer's assigned reviews
+            List<aletheia.project.Aletheia.entity.ReviewEntity> allAssignedReviews = reviewRepository.findByReviewerIdWithPaper(user.getId());
+            
+            // Calculate statistics
+            int totalAssigned = allAssignedReviews.size();
+            int completedReviews = (int) allAssignedReviews.stream().filter(r -> "COMPLETED".equalsIgnoreCase(r.getStatus())).count();
+            int pendingReviews = (int) allAssignedReviews.stream().filter(r -> "PENDING".equalsIgnoreCase(r.getStatus())).count();
+            
+            // Get recent 5 assignments
+            List<aletheia.project.Aletheia.entity.ReviewEntity> recentAssignments = allAssignedReviews.stream()
+                    .limit(5)
+                    .toList();
+            
+            model.addAttribute("assignedReview", totalAssigned);
+            model.addAttribute("completedReviews", completedReviews);
+            model.addAttribute("PendingReviews", pendingReviews);
+            model.addAttribute("recentAssignments", recentAssignments);
+            
             model.addAttribute("pageTitle", "Reviewer Dashboard");
             model.addAttribute("pageSubtitle", "Review assigned papers");
             return "dashboard/reviewer";
