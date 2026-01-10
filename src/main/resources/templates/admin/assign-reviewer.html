@@ -36,7 +36,12 @@
 
                     <div>
                         <label for="deadline" class="block text-sm font-medium text-gray-300 mb-1">Deadline</label>
-                        <input type="date" id="deadline" name="deadline" required class="w-full bg-gray-800/50 border border-gray-700 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition">
+                        <input type="date"
+                            id="deadline"
+                            name="deadline"
+                            required
+                            th:attr="min=${#temporals.format(#temporals.createNow().plusDays(1), 'yyyy-MM-dd')}"
+                            class="w-full bg-gray-800/50 border border-gray-700 rounded-lg px-3 py-2 text-white">
                     </div>
 
                     <div class="flex justify-end">
