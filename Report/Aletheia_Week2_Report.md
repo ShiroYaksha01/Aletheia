@@ -49,7 +49,60 @@
        - Editing `Report/Aletheia_Week1_Report.md` to show week 1 progress in simple sentences.
        - Accepting pull request to merge from Kity (He accidentally delete the report folder because he thought it might be the causes for build error).
        - Adding Report folders back alongside week2 report
+
+
+5. Commits on Dec 21, 2025
+   - Setha:
+       - Edited Week 2 report to add Pheaktra and Kity activity on the report
+   - Kimheng:
+       - Added his own commit on week 2 report progress
+       - Created Diagram folder inside the report folder which included `activty_diagram.puml`, `login-register_activity_diagram.puml`, and `use_case.puml`.
+       - Created `PaperEntity.java` file
+
+
+6. Commits on Dec 22, 2025
+   - Kimheng:
+       - feat: Add paper submission system with entity, service, controller and UI
+         - Create complete V1 migration with papers table (BIGINT id, abstract_text, file_name, created_at)
+         - Implement PaperEntity, PaperRepository, and PaperService
+         - Build PaperController with paper creation endpoints
+       - fix files ReviewRepository and AssigmentRepository reviewerID -> reviewer.id
+
    - Phayuk:
-       - created repositories
-       - created entities
-       - drafted controller (no logic yet)
+       - created repositories, entities, and drafted controller (no logic yet) for 
+         - Assignment
+         - CoAuthor
+         - CoAuthorId
+         - Paper (This one conflicted with Kimheng commit)
+         - Review
+   - Setha:
+       - Accepted merge pull request from Kimheng
+       - Fixing conflict between Kimheng and Phayuk commit (Both of them done on Paper repositories, entities, and controller), and i choose kimheng commit as Kimheng had finished All of paper controller, entities and repositories
+       - Accepted merge pull request from Phayuk
+       - Accepted merge pull request from Kity
+   - Kity:
+       - Fix securityConfig bug
+
+            ```java
+                        .authenticationProvider(authProvider())
+                        .authorizeHttpRequests(auth -> auth
+                            // 1. Only allow these without login
+                            .requestMatchers("/login", "/register").permitAll()
+                            .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+                            // 2. Everything else requires authentication
+                            .anyRequest().authenticated()
+            ```
+
+            to 
+
+            ```java
+                        .authenticationProvider(authProvider())
+                        .authorizeHttpRequests(auth -> auth
+                            // 1. Only allow these without login
+                            .requestMatchers("/login", "/register", "/login-process", "/register-process").permitAll()
+                            .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+                            // 2. Everything else requires authentication
+                            .anyRequest().authenticated()
+            ```
+
+
