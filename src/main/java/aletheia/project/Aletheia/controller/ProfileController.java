@@ -30,7 +30,16 @@ public class ProfileController {
         String email = principal.getName();
         UserEntity user = userRepository.findByEmail(email).orElseThrow();
         
+        // Determine available roles based on current user's role
+        String[] availableRoles;
+        if ("ADMIN".equals(user.getRole())) {
+            availableRoles = new String[]{"ADMIN", "RESEARCHER", "REVIEWER"};
+        } else {
+            availableRoles = new String[]{"RESEARCHER", "REVIEWER"};
+        }
+        
         model.addAttribute("user", user);
+        model.addAttribute("availableRoles", availableRoles);
         model.addAttribute("pageTitle", "Edit Profile");
         model.addAttribute("pageSubtitle", "Update your personal information");
         
@@ -61,10 +70,18 @@ public class ProfileController {
         existingUser.setFirstName(userForm.getFirstName());
         existingUser.setLastName(userForm.getLastName());
         
-        // Only allow role change between RESEARCHER and REVIEWER (not ADMIN)
+        // Role validation based on current user's role
         String newRole = userForm.getRole();
-        if ("RESEARCHER".equalsIgnoreCase(newRole) || "REVIEWER".equalsIgnoreCase(newRole)) {
-            existingUser.setRole(newRole.toUpperCase());
+        if ("ADMIN".equals(existingUser.getRole())) {
+            // Admin can change to any role
+            if ("ADMIN".equalsIgnoreCase(newRole) || "RESEARCHER".equalsIgnoreCase(newRole) || "REVIEWER".equalsIgnoreCase(newRole)) {
+                existingUser.setRole(newRole.toUpperCase());
+            }
+        } else {
+            // Non-admin can only change between RESEARCHER and REVIEWER
+            if ("RESEARCHER".equalsIgnoreCase(newRole) || "REVIEWER".equalsIgnoreCase(newRole)) {
+                existingUser.setRole(newRole.toUpperCase());
+            }
         }
         
         userRepository.save(existingUser);
