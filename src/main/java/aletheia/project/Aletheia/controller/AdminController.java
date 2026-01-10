@@ -82,6 +82,22 @@ public class AdminController {
             PaperEntity paper = paperRepository.findById(id).orElseThrow();
             UserEntity reviewer = userRepository.findById(reviewerId).orElseThrow();
 
+            LocalDate today = LocalDate.now();
+            LocalDate minDeadline = today.plusDays(1);
+
+            if (deadline == null) {
+                redirectAttributes.addFlashAttribute("error", "Deadline is required.");
+                return "redirect:/admin/papers/" + id + "/assign";
+            }
+
+            if (deadline.isBefore(minDeadline)) {
+                redirectAttributes.addFlashAttribute(
+                    "error",
+                    "Deadline must be at least 1 day from today."
+                );
+                return "redirect:/admin/papers/" + id + "/assign";
+            }
+
             // Create new Review Entity
             ReviewEntity review = new ReviewEntity();
             review.setPaper(paper);
