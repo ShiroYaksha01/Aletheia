@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/index}">
+<head>
+    <title>Manage Reviews</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold text-white">Manage Reviews</h1>
+            <p class="text-gray-400">Manage review assignments and statuses</p>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${success}" class="mb-4 p-4 bg-green-500/10 border border-green-500/20 rounded-lg text-green-400">
+            <span th:text="${success}"></span>
+        </div>
+        <div th:if="${error}" class="mb-4 p-4 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400">
+            <span th:text="${error}"></span>
+        </div>
+
+        <div class="glass-card rounded-xl overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-gray-800/50 text-gray-400 uppercase font-medium">
+                        <tr>
+                            <th class="px-6 py-4">Paper</th>
+                            <th class="px-6 py-4">Reviewer</th>
+                            <th class="px-6 py-4">Submitted Date</th>
+                            <th class="px-6 py-4">Status</th>
+                            <th class="px-6 py-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-800">
+                        <tr th:if="${#lists.isEmpty(reviews)}">
+                            <td colspan="5" class="px-6 py-8 text-center text-gray-500">
+                                No reviews found.
+                            </td>
+                        </tr>
+                        
+                        <tr th:each="review : ${reviews}" class="hover:bg-gray-800/30 transition-colors">
+                            <td class="px-6 py-4">
+                                <div>
+                                    <div class="font-medium text-white" th:text="${review.paper.title}">Paper Title</div>
+                                    <div class="text-xs text-gray-500">
+                                        <span th:text="${review.paper.author.getFullName()}">Author Name</span>
+                                    </div>
+                                </div>
+                            </td>
+                            
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-500 font-bold">
+                                        <span th:text="${#strings.substring(review.reviewer.firstName, 0, 1)}">R</span>
+                                    </div>
+                                    <div>
+                                        <div class="font-medium text-white" th:text="${review.reviewer.getFullName()}">Reviewer Name</div>
+                                        <div class="text-xs text-gray-500" th:text="${review.reviewer.email}">reviewer@email.com</div>
+                                    </div>
+                                </div>
+                            </td>
+                            
+                            <td class="px-6 py-4 text-gray-400">
+                                <span th:text="${review.submittedDate != null ? #temporals.format(review.submittedDate, 'MMM dd, yyyy') : 'Not submitted'}">Jan 12, 2026</span>
+                            </td>
+                            
+                            <td class="px-6 py-4">
+                                <span th:class="${review.status == 'COMPLETED'} ? 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-500/10 text-green-400' : 
+                                               (${review.status == 'IN_PROGRESS'} ? 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-500/10 text-yellow-400' : 
+                                               'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-500/10 text-gray-400')">
+                                    <span th:class="${review.status == 'COMPLETED'} ? 'w-1.5 h-1.5 bg-green-400 rounded-full' : 
+                                                    (${review.status == 'IN_PROGRESS'} ? 'w-1.5 h-1.5 bg-yellow-400 rounded-full' : 
+                                                    'w-1.5 h-1.5 bg-gray-400 rounded-full')"></span>
+                                    <span th:text="${review.status}">Pending</span>
+                                </span>
+                            </td>
+                            
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    <a th:href="@{/admin/reviews/{id}(id=${review.id})}" 
+                                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-teal-500/10 text-teal-400 hover:bg-teal-500/20 border border-teal-500/20 transition-colors">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                        </svg>
+                                        View
+                                    </a>
+                                    <form th:action="@{/admin/reviews/{id}/delete(id=${review.id})}" method="post" class="delete-form" style="display: inline;">
+                                        <button type="button" class="open-delete-modal inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 transition-colors">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                            </svg>
+                                            Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Delete Modal -->
+        <div th:replace="~{fragments/delete-modal :: delete-modal}"></div>
+    </div>
+</body>
+</html>
