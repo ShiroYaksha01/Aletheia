@@ -41,6 +41,10 @@ public interface ReviewRepository extends JpaRepository<ReviewEntity, Long> {
     @Query("SELECT r FROM ReviewEntity r JOIN FETCH r.paper JOIN FETCH r.reviewer WHERE r.id = :id")
     Optional<ReviewEntity> findByIdWithDetails(@Param("id") Long id);
     
+        // Find all reviews with full details
+        @Query("SELECT r FROM ReviewEntity r JOIN FETCH r.paper p JOIN FETCH r.reviewer JOIN FETCH p.author")
+        List<ReviewEntity> findAllWithDetails();
+    
     // Find reviews for paper with reviewer details
     @Query("SELECT r FROM ReviewEntity r JOIN FETCH r.reviewer WHERE r.paper.id = :paperId")
     List<ReviewEntity> findByPaperIdWithReviewer(@Param("paperId") Long paperId);

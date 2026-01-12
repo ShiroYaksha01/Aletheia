@@ -14,6 +14,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @Controller
 @RequestMapping("/admin")
@@ -254,4 +257,46 @@ public class AdminController {
 
         return "redirect:/admin/papers";
     }
+
+    @GetMapping("/reviews")
+    public String getReview(Model model) {
+        List<ReviewEntity> reviews = reviewRepository.findAllWithDetails();
+        model.addAttribute("reviews", reviews);
+        return "admin/reviews";
+    }
+
+    // View specific review details
+    @GetMapping("/reviews/{id}")
+    public String viewReview(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
+        try {
+            ReviewEntity review = reviewRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Review not found"));
+            
+            model.addAttribute("review", review);
+            return "admin/review-detail";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Review not found.");
+            return "redirect:/admin/reviews";
+        }
+    }
+
+    // Delete a review
+    @PostMapping("/reviews/{id}/delete")
+    public String deleteReview(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            if (!reviewRepository.existsById(id)) {
+                redirectAttributes.addFlashAttribute("error", "Review not found!");
+                return "redirect:/admin/reviews";
+            }
+
+            reviewRepository.deleteById(id);
+            redirectAttributes.addFlashAttribute("success", "Review deleted successfully.");
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "An error occurred while trying to delete the review.");
+        }
+
+        return "redirect:/admin/reviews";
+    }
+    
 }
