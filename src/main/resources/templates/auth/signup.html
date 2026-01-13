@@ -28,16 +28,19 @@
                     <div class="space-y-2">
                         <label for="firstName" class="text-sm font-medium text-gray-300">First Name</label>
                         <input th:field="*{firstName}" id="firstName" type="text" class="w-full h-10 rounded-md border border-gray-700 bg-[#020817] px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 outline-none text-white" placeholder="John" required />
+                        <p th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}" class="text-xs text-red-500 mt-1"></p>
                     </div>
                     <div class="space-y-2">
                         <label for="lastName" class="text-sm font-medium text-gray-300">Last Name</label>
                         <input th:field="*{lastName}" id="lastName" type="text" class="w-full h-10 rounded-md border border-gray-700 bg-[#020817] px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 outline-none text-white" placeholder="Doe" required />
+                        <p th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}" class="text-xs text-red-500 mt-1"></p>
                     </div>
                 </div>
 
                 <div class="space-y-2">
                     <label for="email" class="text-sm font-medium text-gray-300">Email</label>
                     <input th:field="*{email}" id="email" type="email" class="w-full h-10 rounded-md border border-gray-700 bg-[#020817] px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 outline-none text-white" placeholder="you@university.edu" required />
+                    <p th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-xs text-red-500 mt-1"></p>
                 </div>
 
                 <div class="space-y-2">
@@ -46,12 +49,14 @@
                         <option value="RESEARCHER">Researcher</option>
                         <option value="REVIEWER">Reviewer</option>
                     </select>
+                    <p th:if="${#fields.hasErrors('role')}" th:errors="*{role}" class="text-xs text-red-500 mt-1"></p>
                 </div>
 
                 <div class="space-y-2">
                     <label for="password" class="text-sm font-medium text-gray-300">Password</label>
                     <input th:field="*{password}" id="password" type="password" class="w-full h-10 rounded-md border border-gray-700 bg-[#020817] px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 outline-none text-white" required />
                     <p class="text-xs text-gray-500">Must be at least 6 characters</p>
+                    <p th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="text-xs text-red-500 mt-1"></p>
                 </div>
 
                 <button type="submit" class="w-full h-12 mt-2 rounded-lg bg-gradient-to-r from-teal-600 to-blue-600 text-white font-medium hover:opacity-90 transition-opacity">
