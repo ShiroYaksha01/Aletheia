@@ -59,7 +59,27 @@
             </div>
 
             <th:block th:each="paper : ${papers}">
-                <div th:replace="~{fragments/paper-card :: card(paper=${paper}, variant='researcher')}"></div>
+                <div class="glass-card rounded-xl p-6 mb-4">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="font-semibold text-white text-lg" th:text="${paper.title}">Paper Title</span>
+                        <span th:replace="~{fragments/ui :: statusBadge(status=${paper.status})}"></span>
+                    </div>
+                    <div class="text-sm text-gray-400 mb-2">
+                        <span th:text="|Author: ${paper.author.firstName} ${paper.author.lastName}|">Author Name</span>
+                        <span th:if="${coAuthorsMap[paper.id] != null and !#lists.isEmpty(coAuthorsMap[paper.id])}" class="ml-2">
+                            <span class="text-xs text-gray-400">Co-Authors:</span>
+                            <span th:each="coAuthor : ${coAuthorsMap[paper.id]}" class="px-2 py-1 rounded bg-gray-700 text-gray-200 text-xs ml-1">
+                                <span th:text="${coAuthor.author.firstName} + ' ' + ${coAuthor.author.lastName}">CoAuthor Name</span>
+                            </span>
+                        </span>
+                    </div>
+                    <div class="text-xs text-gray-500 mb-2" th:text="${#temporals.format(paper.createdAt, 'dd MMM yyyy')}">01 Jan 2024</div>
+                    <div class="flex gap-2 mt-2">
+                        <a th:href="@{/papers/{id}(id=${paper.id})}" class="px-4 py-2 rounded bg-teal-600/10 text-teal-500 hover:bg-teal-600/20 text-xs font-medium">View Details</a>
+                        <a th:if="${authorPaperIds != null and authorPaperIds.contains(paper.id)}" th:href="@{/papers/{id}/edit(id=${paper.id})}" class="px-4 py-2 rounded bg-blue-600/10 text-blue-500 hover:bg-blue-600/20 text-xs font-medium">Edit</a>
+                        <span th:if="${coAuthorPaperIds != null and coAuthorPaperIds.contains(paper.id)}" class="px-4 py-2 rounded bg-gray-700 text-gray-400 text-xs font-medium cursor-not-allowed">View Only</span>
+                    </div>
+                </div>
             </th:block>
         </div>
 

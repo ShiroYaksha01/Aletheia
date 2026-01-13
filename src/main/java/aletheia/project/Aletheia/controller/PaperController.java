@@ -8,6 +8,7 @@ import aletheia.project.Aletheia.repository.PaperRepository;
 import aletheia.project.Aletheia.repository.ReviewRepository;
 import aletheia.project.Aletheia.repository.UserRepository;
 import aletheia.project.Aletheia.service.PaperService;
+import aletheia.project.Aletheia.repository.CoAuthorRepository;
 import jakarta.validation.Valid;
 
 import java.io.IOException;
@@ -44,15 +45,17 @@ public class PaperController {
     private final UserRepository userRepository;
     private final PaperRepository paperRepository;
     private final ReviewRepository reviewRepository;
-    
+    private final CoAuthorRepository coAuthorRepository;
+
     @Value("${file.upload-dir:uploads/papers}")
     private String uploadDir;
-    
-    public PaperController(PaperService paperService, UserRepository userRepository, PaperRepository paperRepository, ReviewRepository reviewRepository) {
+
+    public PaperController(PaperService paperService, UserRepository userRepository, PaperRepository paperRepository, ReviewRepository reviewRepository, CoAuthorRepository coAuthorRepository) {
         this.paperService = paperService;
         this.userRepository = userRepository;
         this.paperRepository = paperRepository;
         this.reviewRepository = reviewRepository;
+        this.coAuthorRepository = coAuthorRepository;
     }
 
 @GetMapping("/submit")
@@ -75,14 +78,55 @@ public String showSubmitForm(Model model) {
         UserEntity currentUser = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // 2. Fetch data using the Repository Query
-        List<PaperEntity> papers = paperRepository.searchMyPapers(currentUser, search, status);
+        // 2. Fetch papers where user is author
+        List<PaperEntity> authoredPapers = paperRepository.searchMyPapers(currentUser, search, status);
 
-        // 3. Add to model
-        model.addAttribute("papers", papers);
+        // 3. Fetch papers where user is co-author
+        List<aletheia.project.Aletheia.entity.CoAuthorEntity> coAuthorEntities = coAuthorRepository.findByAuthorId(currentUser.getId());
+        java.util.Set<Long> coAuthorPaperIds = new java.util.HashSet<>();
+        java.util.List<PaperEntity> coAuthoredPapers = new java.util.ArrayList<>();
+        for (aletheia.project.Aletheia.entity.CoAuthorEntity ca : coAuthorEntities) {
+            PaperEntity paper = ca.getPaper();
+            // Filter by search and status
+            boolean matches = true;
+            if (search != null && !search.isBlank()) {
+                String keyword = search.toLowerCase();
+                matches = paper.getTitle().toLowerCase().contains(keyword);
+            }
+            if (matches && status != null && !"all".equals(status)) {
+                matches = status.equals(paper.getStatus());
+            }
+            if (matches) {
+                coAuthoredPapers.add(paper);
+                coAuthorPaperIds.add(paper.getId());
+            }
+        }
+
+        // 4. Merge authored and co-authored papers (avoid duplicates)
+        java.util.Map<Long, PaperEntity> paperMap = new java.util.LinkedHashMap<>();
+        java.util.Set<Long> authorPaperIds = new java.util.HashSet<>();
+        for (PaperEntity p : authoredPapers) {
+            paperMap.put(p.getId(), p);
+            authorPaperIds.add(p.getId());
+        }
+        for (PaperEntity p : coAuthoredPapers) {
+            paperMap.putIfAbsent(p.getId(), p);
+        }
+        java.util.List<PaperEntity> allPapers = new java.util.ArrayList<>(paperMap.values());
+
+        // 5. Build coAuthorsMap (paperId -> List<CoAuthorEntity>)
+        java.util.Map<Long, java.util.List<aletheia.project.Aletheia.entity.CoAuthorEntity>> coAuthorsMap = new java.util.HashMap<>();
+        for (PaperEntity p : allPapers) {
+            coAuthorsMap.put(p.getId(), coAuthorRepository.findByPaperIdWithAuthor(p.getId()));
+        }
+
+        // 6. Add to model
+        model.addAttribute("papers", allPapers);
+        model.addAttribute("coAuthorsMap", coAuthorsMap);
+        model.addAttribute("authorPaperIds", authorPaperIds);
+        model.addAttribute("coAuthorPaperIds", coAuthorPaperIds);
         model.addAttribute("searchQuery", search); // To keep input filled
         model.addAttribute("currentStatus", status); // To keep dropdown selected
-
         model.addAttribute("pageTitle", "My Papers");
         model.addAttribute("pageSubtitle", "Manage all your submitted papers");
         return "papers/my-papers";
@@ -97,25 +141,30 @@ public String showSubmitForm(Model model) {
             .orElseThrow(() -> new RuntimeException("Paper not found with id: " + id));
 
         List<ReviewEntity> reviews = reviewRepository.findByPaperId(id);
+        // Fetch co-authors
+        List<aletheia.project.Aletheia.entity.CoAuthorEntity> coAuthors = coAuthorRepository.findByPaperId(id);
 
-        // 2. Add to Model
         model.addAttribute("paper", paper);
         model.addAttribute("reviews", reviews);
-        
-        // 3. Determine if current user is the author (to show/hide specific buttons)
+        model.addAttribute("coAuthors", coAuthors);
+
+        boolean isAuthor = false;
+        boolean isCoAuthor = false;
+        boolean canViewReviews = false;
         if (userDetails != null) {
             UserEntity currentUser = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
-            boolean isAuthor = currentUser != null && currentUser.getId().equals(paper.getAuthor().getId());
-            boolean canViewReviews = isAuthor && (paper.getStatus().equals("ACCEPTED") || paper.getStatus().equals("REJECTED"));
-            
-            model.addAttribute("isAuthor", isAuthor);
-            model.addAttribute("canViewReviews", canViewReviews);
+            if (currentUser != null) {
+                isAuthor = currentUser.getId().equals(paper.getAuthor().getId());
+                isCoAuthor = coAuthors.stream().anyMatch(ca -> ca.getAuthorId().equals(currentUser.getId()));
+                canViewReviews = (isAuthor || isCoAuthor) && (paper.getStatus().equals("ACCEPTED") || paper.getStatus().equals("REJECTED"));
+            }
         }
-
+        model.addAttribute("isAuthor", isAuthor);
+        model.addAttribute("isCoAuthor", isCoAuthor);
+        model.addAttribute("canViewReviews", canViewReviews);
         model.addAttribute("pageTitle", "Paper Details");
         model.addAttribute("pageSubtitle", "View detailed information about the paper");
-
-        return "papers/detail"; // Maps to templates/papers/detail.html
+        return "papers/detail";
     }
 
     @GetMapping("/files/{filename:.+}")
@@ -156,19 +205,16 @@ public String showSubmitForm(Model model) {
         @Valid @ModelAttribute PaperRequest paperRequest,
         BindingResult bindingResult,
         @RequestParam(value = "file", required = false) MultipartFile file,
-        // [ADDED] Capture the custom input field for "Other" area
         @RequestParam(value = "customResearchArea", required = false) String customResearchArea,
+        @RequestParam(value = "coAuthorEmails", required = false) String coAuthorEmails,
         @AuthenticationPrincipal UserDetails userDetails,
         RedirectAttributes redirectAttributes,
         Model model
     ) {
-        // 1. Check if user is logged in
         if (userDetails == null) {
             redirectAttributes.addFlashAttribute("error", "You must be logged in to create a paper.");
             return "redirect:/login";
         }
-
-        // 2. Validate File
         if (file != null && !file.isEmpty()) {
             String contentType = file.getContentType();
             if (contentType == null || !"application/pdf".equals(contentType)) {
@@ -178,45 +224,48 @@ public String showSubmitForm(Model model) {
                 bindingResult.reject("error.file", "File size must not exceed 10MB");
             }
         } else {
-             // Optional: If file is mandatory, reject here
-             bindingResult.reject("error.file", "Paper file is required.");
+            bindingResult.reject("error.file", "Paper file is required.");
         }
-
         if (bindingResult.hasErrors()) {
             return "papers/submit";
         }
-
         try {
-            // 3. Fetch User
             String email = userDetails.getUsername();
             UserEntity author = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found: " + email));
-
-            // [LOGIC ADDED] Handle Research Area (Dropdown vs Custom Input)
             String finalResearchArea = paperRequest.getResearchArea();
             if ("OTHER".equalsIgnoreCase(finalResearchArea) && customResearchArea != null && !customResearchArea.isBlank()) {
                 finalResearchArea = customResearchArea.trim();
             }
-
-
-            // 4. Call Service with all data
-            // NOTE: You must update your PaperService.createPaper signature to accept these new fields!
-            paperService.createPaper(
+            PaperEntity paper = paperService.createPaper(
                 paperRequest.getTitle(),
                 paperRequest.getAbstractText(),
-                finalResearchArea, // Passed the processed area
+                finalResearchArea,
                 file,
                 author
             );
-
+            // Handle co-authors
+            if (coAuthorEmails != null && !coAuthorEmails.isBlank()) {
+                String[] emails = coAuthorEmails.split(",");
+                for (String coEmail : emails) {
+                    String trimmedEmail = coEmail.trim();
+                    if (!trimmedEmail.isEmpty() && !trimmedEmail.equalsIgnoreCase(author.getEmail())) {
+                        UserEntity coAuthor = userRepository.findByEmail(trimmedEmail).orElse(null);
+                        if (coAuthor != null) {
+                            aletheia.project.Aletheia.entity.CoAuthorEntity entity = new aletheia.project.Aletheia.entity.CoAuthorEntity(paper.getId(), coAuthor.getId());
+                            entity.setPaper(paper);
+                            entity.setAuthor(coAuthor);
+                            coAuthorRepository.save(entity);
+                        }
+                    }
+                }
+            }
             redirectAttributes.addFlashAttribute("success", "Paper created successfully!");
             return "redirect:/dashboard";
-            
         } catch (Exception e) {
             e.printStackTrace();
             model.addAttribute("error", "Failed to upload paper: " + e.getMessage());
-            // Important: Add the paperRequest back so the form doesn't go blank on error
-            model.addAttribute("paperRequest", paperRequest); 
+            model.addAttribute("paperRequest", paperRequest);
             return "papers/submit";
         }
     }
@@ -260,6 +309,7 @@ public String showSubmitForm(Model model) {
             BindingResult bindingResult,
             @RequestParam(value = "file", required = false) MultipartFile file,
             @RequestParam(value = "customResearchArea", required = false) String customResearchArea,
+            @RequestParam(value = "coAuthorEmails", required = false) String coAuthorEmails,
             @AuthenticationPrincipal UserDetails userDetails,
             RedirectAttributes redirectAttributes,
             Model model
@@ -275,7 +325,6 @@ public String showSubmitForm(Model model) {
             throw new RuntimeException("Unauthorized access");
         }
 
-        // Validate new file if uploaded
         if (file != null && !file.isEmpty()) {
             if (!"application/pdf".equals(file.getContentType())) {
                 bindingResult.reject("error.file", "Only PDF files allowed");
@@ -304,6 +353,24 @@ public String showSubmitForm(Model model) {
                 finalResearchArea,
                 file
         );
+
+        // Update co-authors: remove all and re-add
+        coAuthorRepository.deleteByPaperId(id);
+        if (coAuthorEmails != null && !coAuthorEmails.isBlank()) {
+            String[] emails = coAuthorEmails.split(",");
+            for (String coEmail : emails) {
+                String trimmedEmail = coEmail.trim();
+                if (!trimmedEmail.isEmpty() && !trimmedEmail.equalsIgnoreCase(currentUser.getEmail())) {
+                    UserEntity coAuthor = userRepository.findByEmail(trimmedEmail).orElse(null);
+                    if (coAuthor != null) {
+                        aletheia.project.Aletheia.entity.CoAuthorEntity entity = new aletheia.project.Aletheia.entity.CoAuthorEntity(paper.getId(), coAuthor.getId());
+                        entity.setPaper(paper);
+                        entity.setAuthor(coAuthor);
+                        coAuthorRepository.save(entity);
+                    }
+                }
+            }
+        }
 
         redirectAttributes.addFlashAttribute("success", "Paper updated successfully!");
         return "redirect:/papers/" + id;

@@ -17,20 +17,16 @@
             
             <div class="glass-card rounded-xl p-6 space-y-6">
                 <h2 class="text-lg font-semibold text-white">Paper Information</h2>
-                
                 <div class="space-y-2">
                     <label class="text-sm font-medium text-gray-200">Paper Title *</label>
                     <input type="text" th:field="*{title}" class="w-full bg-[#020817] border border-gray-800 rounded-md p-2 text-white" placeholder="Enter paper title" required>
                 </div>
-
                 <div class="space-y-2">
                     <label class="text-sm font-medium text-gray-200">Abstract *</label>
                     <textarea th:field="*{abstractText}" rows="4" class="w-full bg-[#020817] border border-gray-800 rounded-md p-2 text-white" placeholder="Brief summary of your research..." required></textarea>
                 </div>
-
                 <div class="space-y-2">
                     <label class="text-sm font-medium text-gray-200">Research Area *</label>
-                    
                     <select id="researchAreaSelect" th:field="*{researchArea}" class="w-full bg-[#020817] border border-gray-800 rounded-md p-2 text-white" required onchange="toggleOtherInput()">
                         <option value="" disabled selected>Select an area</option>
                         <option value="AI">Artificial Intelligence</option>
@@ -40,11 +36,15 @@
                         <option value="SE">Software Engineering</option>
                         <option value="OTHER">Other</option>
                     </select>
-
                     <div id="otherAreaContainer" class="hidden mt-3 transition-all duration-300">
                         <label class="text-sm font-medium text-gray-200">Please specify area *</label>
                         <input type="text" id="customAreaInput" name="customResearchArea" class="w-full mt-1 bg-[#020817] border border-gray-800 rounded-md p-2 text-white" placeholder="Enter your specific research area">
                     </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-sm font-medium text-gray-200">Co-Authors</label>
+                    <input type="text" name="coAuthorEmails" class="w-full bg-[#020817] border border-gray-800 rounded-md p-2 text-white" placeholder="Enter co-author emails, separated by commas">
+                    <p class="text-xs text-gray-500">Enter email addresses of co-authors, separated by commas. (They will have view-only access.)</p>
                 </div>
             </div>
 
