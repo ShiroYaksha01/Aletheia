@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import aletheia.project.Aletheia.dto.AuthResponse;
@@ -87,7 +88,12 @@ public class AuthenticationController {
     
     // Login
     @PostMapping("/login-process")
-    public String login(@ModelAttribute LoginRequest loginRequest, HttpServletResponse response) {
+    public String login(@ModelAttribute @Valid LoginRequest loginRequest, BindingResult bindingResult, Model model, HttpServletResponse response) {
+        // 0. Check for validation errors
+        if (bindingResult.hasErrors()) {
+            return "auth/login";
+        }
+
         try {
                 // 1. Authenticate the user
                 authenticationManager.authenticate(
@@ -111,7 +117,12 @@ public class AuthenticationController {
 
     // Register
     @PostMapping("/register-process")
-    public String register(@ModelAttribute @Valid RegisterRequest registerRequest, HttpServletResponse response) {
+    public String register(@ModelAttribute @Valid RegisterRequest registerRequest, BindingResult bindingResult, Model model, HttpServletResponse response) {
+        // 0. Check for validation errors
+        if (bindingResult.hasErrors()) {
+            return "auth/signup";
+        }
+
         // 1. Check if user exists
         if (userRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
             return "redirect:/register?error=user_exists";
