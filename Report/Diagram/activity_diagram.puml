@@ -38,13 +38,12 @@ if (Role?) then (Researcher)
   if (Paper valid?) then (yes)
     :Store paper in database;
     :Set status "Pending Review";
-    :Send confirmation email;
   else (no)
     :Display validation errors;
   endif
   
   |Researcher|
-  :View submission status;
+  :Go to dashboard;
   stop
 
 else if (Role?) then (Reviewer)
@@ -64,13 +63,12 @@ else if (Role?) then (Reviewer)
   if (Review valid?) then (yes)
     :Store review;
     :Update paper status;
-    :Notify researcher;
   else (no)
     :Display validation errors;
   endif
   
   |Reviewer|
-  :View review history;
+  :Go to dashboard;
   stop
 
 else if (Role?) then (Admin)
@@ -86,15 +84,12 @@ else if (Role?) then (Admin)
   
   |System|
   :Create review assignment;
-  :Send notification to reviewer;
   
   |Admin|
-  :View all reviews;
-  :Generate reports;
+  :View review status;
   stop
 else
     |System|
-    :Display error "Unknown role";
     stop
 endif
 

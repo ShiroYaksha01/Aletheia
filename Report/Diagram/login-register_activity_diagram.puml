@@ -22,20 +22,6 @@ if (Has account?) then (yes)
         stop
       else (no)
         :Display error message\n"Invalid credentials";
-        :Increment failed attempt counter;
-        
-        if (Failed attempts > 3?) then (yes)
-          ' :Lock account temporarily;
-          ' :Send notification email;
-          :Display security alert;
-          note right: lock the login attempts for 60 seconds
-          if (Wait for lockout period?) then (yes)
-            :Wait for 60 seconds;
-          else (no)
-            :exit process;
-            stop
-          endif
-        endif
       endif
     else (no)
       :Display error message\n"Invalid input format";

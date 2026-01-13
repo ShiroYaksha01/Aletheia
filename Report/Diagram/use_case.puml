@@ -23,40 +23,63 @@ rectangle "Reviewer Functions" {
 
 rectangle "Admin Functions" {
     usecase (Manage Users) as UC9
+    usecase (Edit Users) as UC9a
     usecase (Assign Reviewers) as UC10
     usecase (View All Papers) as UC11
     usecase (View All Reviews) as UC12
-    usecase (Generate Reports) as UC13
 }
 
+usecase (Validate Review Format) as UC13
 usecase (Authenticate User) as UC14
 usecase (Validate Paper Format) as UC15
+usecase (View Profile) as UC16
+usecase (Update Profile) as UC17
+usecase (Preview Paper) as UC18
+usecase (Download Paper) as UC19
 
 Researcher --> UC1
 Researcher --> UC2
 Researcher --> UC3
 Researcher --> UC4
 Researcher --> UC5
+Researcher --> UC16
+
 
 Reviewer --> UC1
 Reviewer --> UC6
 Reviewer --> UC7
 Reviewer --> UC8
+Reviewer --> UC16
+
 
 Admin --> UC1
 Admin --> UC9
 Admin --> UC10
 Admin --> UC11
 Admin --> UC12
-Admin --> UC13
+Admin --> UC16
+
+
 
 ' Include relationships
 UC1 ..> UC14 : <<include>>
 UC2 ..> UC15 : <<include>>
 UC10 ..> UC11 : <<include>>
+UC7 ..> UC13 : <<include>>
+UC16 ..> UC17 : <<include>>
+
+
 
 ' Extend relationships
 UC8 ..> UC7 : <<extend>>
 UC3 ..> UC2 : <<extend>>
+UC3 ..> UC18 : <<extend>>
+UC3 ..> UC19 : <<extend>>
+UC6 ..> UC18 : <<extend>>
+UC6 ..> UC19 : <<extend>>
+UC11 ..> UC18 : <<extend>>
+UC11 ..> UC19 : <<extend>>
+UC9 ..> UC9a : <<extend>>
+
 
 @enduml
