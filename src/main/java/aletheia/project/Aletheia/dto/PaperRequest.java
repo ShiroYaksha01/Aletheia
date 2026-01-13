@@ -45,6 +45,7 @@ public class PaperRequest {
     }
 
     private String fileName; // for edit mode display
+    private String coAuthorEmails; // comma-separated co-author emails
 
     public String getFileName() {
         return fileName;
@@ -52,6 +53,14 @@ public class PaperRequest {
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    public String getCoAuthorEmails() {
+        return coAuthorEmails;
+    }
+
+    public void setCoAuthorEmails(String coAuthorEmails) {
+        this.coAuthorEmails = coAuthorEmails;
     }
 
 }

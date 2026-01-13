@@ -41,6 +41,19 @@
                                 <span th:text="${#temporals.format(paper.createdAt, 'MMMM d, yyyy')}">January 1, 2024</span>
                             </div>
                         </div>
+                        
+                        <!-- Co-Authors Section -->
+                        <div th:if="${coAuthors != null and !#lists.isEmpty(coAuthors)}" class="border-b border-gray-800 pb-6">
+                            <h4 class="text-md font-semibold text-white mb-3">Co-Authors</h4>
+                            <div class="flex flex-wrap gap-3">
+                                <div th:each="coAuthor : ${coAuthors}" class="flex items-center gap-2 bg-gray-800/30 rounded-full px-3 py-1.5">
+                                    <div class="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 font-bold text-xs">
+                                        <span th:text="${#strings.substring(coAuthor.firstName, 0, 1)}">C</span>
+                                    </div>
+                                    <span class="text-sm text-gray-300" th:text="|${coAuthor.firstName} ${coAuthor.lastName}|">Co-Author Name</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="space-y-3 w-full">
@@ -129,7 +142,7 @@
                         View PDF
                     </a>
                     
-                    <form th:if="${#authorization.expression('hasRole(''RESEARCHER'')')}" 
+                    <form th:if="${isAuthor and #authorization.expression('hasRole(''RESEARCHER'')')}" 
                           th:action="@{/papers/{id}/delete(id=${paper.id})}" method="post" class="delete-form">
                         <button type="button" class="flex items-center justify-center w-full h-10 rounded-lg bg-red-600/20 hover:bg-red-600/40 text-red-300 transition-colors border border-red-600/30 transition-colors open-delete-modal" title="Delete Paper">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>

@@ -117,6 +117,23 @@
                         </div>
                     </div>
 
+                    <!-- Co-Authors Field -->
+                    <div class="space-y-2">
+                        <label for="coAuthorEmails" class="block text-sm font-semibold text-gray-100">
+                            <span>Co-Authors (Optional)</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="coAuthorEmails"
+                            th:field="*{coAuthorEmails}" 
+                            class="w-full bg-[#020817] border border-gray-700 rounded-lg p-3 text-white placeholder-gray-500
+                                    focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none
+                                    transition-colors duration-200"
+                            placeholder="author1@email.com, author2@email.com"
+                            maxlength="500">
+                        <p class="text-xs text-gray-500">Separate multiple email addresses with commas. Co-authors can view the paper but not edit it.</p>
+                    </div>
+
                     <!-- Research Area Field -->
                     <div class="space-y-2">
                         <label for="researchAreaSelect" class="block text-sm font-semibold text-gray-100 flex items-center justify-between">
