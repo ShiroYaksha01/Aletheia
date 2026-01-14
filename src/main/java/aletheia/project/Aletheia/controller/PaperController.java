@@ -4,6 +4,8 @@ import aletheia.project.Aletheia.dto.PaperRequest;
 import aletheia.project.Aletheia.entity.PaperEntity;
 import aletheia.project.Aletheia.entity.ReviewEntity;
 import aletheia.project.Aletheia.entity.UserEntity;
+import aletheia.project.Aletheia.entity.CoAuthorEntity;
+import aletheia.project.Aletheia.repository.CoAuthorRepository;
 import aletheia.project.Aletheia.repository.PaperRepository;
 import aletheia.project.Aletheia.repository.ReviewRepository;
 import aletheia.project.Aletheia.repository.UserRepository;
@@ -47,15 +49,17 @@ public class PaperController {
     private final UserRepository userRepository;
     private final PaperRepository paperRepository;
     private final ReviewRepository reviewRepository;
+    private final CoAuthorRepository coAuthorRepository;
     
     @Value("${file.upload-dir:uploads/papers}")
     private String uploadDir;
     
-    public PaperController(PaperService paperService, UserRepository userRepository, PaperRepository paperRepository, ReviewRepository reviewRepository) {
+    public PaperController(PaperService paperService, UserRepository userRepository, PaperRepository paperRepository, ReviewRepository reviewRepository, CoAuthorRepository coAuthorRepository) {
         this.paperService = paperService;
         this.userRepository = userRepository;
         this.paperRepository = paperRepository;
         this.reviewRepository = reviewRepository;
+        this.coAuthorRepository = coAuthorRepository;
     }
 
 @GetMapping("/submit")
@@ -78,13 +82,43 @@ public String showSubmitForm(Model model) {
         UserEntity currentUser = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // 2. Fetch data using the Repository Query
-        List<PaperEntity> papers = paperRepository.searchMyPapers(currentUser, search, status);
+        // 2. Fetch authored papers
+        List<PaperEntity> authoredPapers = paperRepository.searchMyPapers(currentUser, search, status);
+        
+        // 3. Fetch co-authored papers
+        List<CoAuthorEntity> coAuthoredEntities = coAuthorRepository.findByAuthorIdWithPaper(currentUser.getId());
+        List<PaperEntity> coAuthoredPapers = coAuthoredEntities.stream()
+                .map(CoAuthorEntity::getPaper)
+                .filter(paper -> {
+                    if (search != null && !search.trim().isEmpty()) {
+                        return paper.getTitle().toLowerCase().contains(search.toLowerCase());
+                    }
+                    return true;
+                })
+                .filter(paper -> {
+                    if (status != null && !status.equals("all")) {
+                        return paper.getStatus().equals(status);
+                    }
+                    return true;
+                })
+                .toList();
+        
+        // 4. Combine and deduplicate papers
+        List<PaperEntity> allPapers = new java.util.ArrayList<>(authoredPapers);
+        for (PaperEntity coAuthoredPaper : coAuthoredPapers) {
+            if (!allPapers.contains(coAuthoredPaper)) {
+                allPapers.add(coAuthoredPaper);
+            }
+        }
+        
+        // 5. Sort by creation date (most recent first)
+        allPapers.sort((p1, p2) -> p2.getCreatedAt().compareTo(p1.getCreatedAt()));
 
-        // 3. Add to model
-        model.addAttribute("papers", papers);
-        model.addAttribute("searchQuery", search); // To keep input filled
-        model.addAttribute("currentStatus", status); // To keep dropdown selected
+        // 6. Add to model
+        model.addAttribute("papers", allPapers);
+        model.addAttribute("searchQuery", search);
+        model.addAttribute("currentStatus", status);
+        model.addAttribute("currentUserId", currentUser.getId()); // To determine if user is author or co-author
 
         model.addAttribute("pageTitle", "My Papers");
         model.addAttribute("pageSubtitle", "Manage all your submitted papers");
@@ -100,25 +134,47 @@ public String showSubmitForm(Model model) {
             .orElseThrow(() -> new RuntimeException("Paper not found with id: " + id));
 
         List<ReviewEntity> reviews = reviewRepository.findByPaperId(id);
+        
+        // 2. Fetch co-authors
+        List<CoAuthorEntity> coAuthorEntities = coAuthorRepository.findByPaperIdWithAuthor(id);
+        List<UserEntity> coAuthors = coAuthorEntities.stream()
+                .map(CoAuthorEntity::getAuthor)
+                .toList();
 
-        // 2. Add to Model
+        // 3. Add to Model
         model.addAttribute("paper", paper);
         model.addAttribute("reviews", reviews);
+        model.addAttribute("coAuthors", coAuthors);
         
-        // 3. Determine if current user is the author (to show/hide specific buttons)
+        // 4. Determine user permissions
+        boolean isAuthor = false;
+        boolean isCoAuthor = false;
+        boolean canViewReviews = false;
+        
         if (userDetails != null) {
-            UserEntity currentUser = userRepository.findByEmail(userDetails.getUsername()).orElse(null);
-            boolean isAuthor = currentUser != null && currentUser.getId().equals(paper.getAuthor().getId());
-            boolean canViewReviews = isAuthor && (paper.getStatus().equals("ACCEPTED") || paper.getStatus().equals("REJECTED"));
+            String email = userDetails.getUsername();
+            UserEntity currentUser = userRepository.findByEmail(email).orElse(null);
             
-            model.addAttribute("isAuthor", isAuthor);
-            model.addAttribute("canViewReviews", canViewReviews);
+            if (currentUser != null) {
+                // Check if user is the main author
+                isAuthor = paper.getAuthor().getId().equals(currentUser.getId());
+                
+                // Check if user is a co-author
+                isCoAuthor = coAuthorRepository.existsByPaperIdAndAuthorId(id, currentUser.getId());
+                
+                // Can view reviews if user is author, co-author, or admin, and paper status is final
+                canViewReviews = (isAuthor || isCoAuthor || currentUser.getRole().equals("ADMIN")) && 
+                               (paper.getStatus().equals("ACCEPTED") || paper.getStatus().equals("REJECTED"));
+            }
         }
-
+        
+        model.addAttribute("isAuthor", isAuthor);
+        model.addAttribute("isCoAuthor", isCoAuthor);
+        model.addAttribute("canViewReviews", canViewReviews);
         model.addAttribute("pageTitle", "Paper Details");
         model.addAttribute("pageSubtitle", "View detailed information about the paper");
 
-        return "papers/detail"; // Maps to templates/papers/detail.html
+        return "papers/detail";
     }
 
     @GetMapping("/files/{filename:.+}")
@@ -222,13 +278,18 @@ public String showSubmitForm(Model model) {
 
             // 4. Call Service with all data
             // NOTE: You must update your PaperService.createPaper signature to accept these new fields!
-            paperService.createPaper(
+            PaperEntity createdPaper = paperService.createPaper(
                 paperRequest.getTitle(),
                 paperRequest.getAbstractText(),
                 finalResearchArea, // Passed the processed area
                 file,
                 author
             );
+            
+            // 5. Save co-authors if provided
+            if (paperRequest.getCoAuthorEmails() != null && !paperRequest.getCoAuthorEmails().trim().isEmpty()) {
+                saveCoAuthors(createdPaper.getId(), paperRequest.getCoAuthorEmails());
+            }
 
             redirectAttributes.addFlashAttribute("success", "Paper created successfully!");
             return "redirect:/dashboard";
@@ -266,6 +327,16 @@ public String showSubmitForm(Model model) {
 
         // Set the file name for display in edit mode
         paperRequest.setFileName(paper.getFileName()); // assuming your PaperEntity has getFileName()
+        
+        // Get existing co-authors and populate the field
+        List<CoAuthorEntity> coAuthorEntities = coAuthorRepository.findByPaperIdWithAuthor(id);
+        if (!coAuthorEntities.isEmpty()) {
+            String coAuthorEmails = coAuthorEntities.stream()
+                    .map(ca -> ca.getAuthor().getEmail())
+                    .reduce((a, b) -> a + ", " + b)
+                    .orElse("");
+            paperRequest.setCoAuthorEmails(coAuthorEmails);
+        }
 
         model.addAttribute("paperRequest", paperRequest);
         model.addAttribute("paperId", paper.getId());
@@ -330,6 +401,9 @@ public String showSubmitForm(Model model) {
                 finalResearchArea,
                 file
         );
+        
+        // Update co-authors
+        updateCoAuthors(id, paperRequest.getCoAuthorEmails());
 
         redirectAttributes.addFlashAttribute("success", "Paper updated successfully!");
         return "redirect:/papers/" + id;
@@ -403,6 +477,43 @@ public String showSubmitForm(Model model) {
         } catch (IOException e) {
             return ResponseEntity.status(500).build();
         }
+    }
+    
+    /**
+     * Helper method to save co-authors for a paper
+     */
+    private void saveCoAuthors(Long paperId, String coAuthorEmails) {
+        if (coAuthorEmails == null || coAuthorEmails.trim().isEmpty()) {
+            return;
+        }
+        
+        // Parse comma-separated emails
+        String[] emails = coAuthorEmails.split(",");
+        
+        for (String email : emails) {
+            email = email.trim();
+            if (!email.isEmpty()) {
+                // Find user by email
+                userRepository.findByEmail(email).ifPresent(coAuthor -> {
+                    // Check if co-author relationship doesn't already exist
+                    if (!coAuthorRepository.existsByPaperIdAndAuthorId(paperId, coAuthor.getId())) {
+                        CoAuthorEntity coAuthorEntity = new CoAuthorEntity(paperId, coAuthor.getId());
+                        coAuthorRepository.save(coAuthorEntity);
+                    }
+                });
+            }
+        }
+    }
+    
+    /**
+     * Helper method to update co-authors for a paper (removes old ones and adds new ones)
+     */
+    private void updateCoAuthors(Long paperId, String coAuthorEmails) {
+        // Remove existing co-authors
+        coAuthorRepository.deleteByPaperId(paperId);
+        
+        // Add new co-authors
+        saveCoAuthors(paperId, coAuthorEmails);
     }
 
 }
